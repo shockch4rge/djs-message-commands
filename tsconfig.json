@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+    "declaration": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"strict": true,
+		"alwaysStrict": true,
+		"allowJs": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"resolveJsonModule": true,
+		"strictNullChecks": true,
+		"strictFunctionTypes": true,
+		"experimentalDecorators": true,
+		"outDir": "./dist"
+	},
+	"exclude": ["**/*.spec.*"]
+}
