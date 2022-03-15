@@ -19,7 +19,6 @@ export class MessageCommandBuilder {
 	public options: MessageCommandOption[];
 	public roleIds: string[];
 	public permissions: PermissionResolvable[];
-	public regex: RegExp;
 
 	public constructor(data?: MessageCommandBuilderData) {
 		this.name = data?.name ?? "No name implemented";
@@ -28,30 +27,53 @@ export class MessageCommandBuilder {
 		this.options = data?.options ?? [];
 		this.roleIds = data?.roleIds ?? [];
 		this.permissions = data?.permissions ?? [];
-		this.regex = data?.regex ?? new RegExp(".");
 	}
 
 	public setName(name: string) {
+		if (name === "") {
+			throw new Error("Command name must be at least one character long.");
+		}
+
 		this.name = name;
 		return this;
 	}
 
 	public setDescription(description: string) {
+		if (description === "") {
+			throw new Error("Command description must be at least one character long.");
+		}
+
 		this.description = description;
 		return this;
 	}
 
 	public setAliases(aliases: string[]) {
+		if (aliases.length <= 0) {
+			throw new Error("There must be at least one alias provided in the array.");
+		}
+
+		if (aliases.some(a => a === "")) {
+			throw new Error("Aliases must be at least one character long.");
+		}
+
 		this.aliases = aliases;
 		return this;
 	}
 
-	public setRoles(roleIds: string[]) {
-		this.roleIds = roleIds;
+	public setRoles(ids: string[]) {
+		if (ids.length <= 0) {
+			throw new Error("There must be at least one role ID provided in the array.");
+		}
+
+		this.roleIds = ids;
 		return this;
 	}
 
 	public setPermissions(permissions: PermissionResolvable[]) {
+		if (permissions.length <= 0) {
+			throw new Error("There must be at least one permission provided in the array.");
+		}
+
 		this.permissions = permissions;
 		return this;
 	}
@@ -96,13 +118,11 @@ export class MessageCommandBuilder {
 			})
 			.join("\\s");
 
-		this.regex = new RegExp(
-			`^${messagePrefix}${this.name}${
-				this.aliases.length > 0 ? `|${this.aliases.join("|")}` : ""
-			}\\s${optionTypes}$`,
+		return new RegExp(
+			`^${messagePrefix}(${this.name}${this.aliases.length > 0 ? `|${this.aliases.join("|")}` : ""})${
+				this.options.length > 0 ? `\\s${optionTypes}` : ""
+			}$`,
 			"gm"
 		);
-
-		return this.regex;
 	}
 }
