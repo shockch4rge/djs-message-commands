@@ -1,6 +1,11 @@
 import { PermissionResolvable } from 'discord.js';
 
 import { MessageCommandOption, MessageCommandOptionType } from './';
+import {
+    MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMentionableOption,
+    MessageCommandNumberOption, MessageCommandStringOption
+} from './MessageCommandOption';
+import { RegexBuilder } from './RegexHelper';
 
 export interface MessageCommandBuilderData {
 	name: string;
@@ -77,52 +82,41 @@ export class MessageCommandBuilder {
 		this.permissions = permissions;
 		return this;
 	}
-	
-	public addStringOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(MessageCommandOptionType.STRING));
-		this.options.push(option);
-		return this;
-	}
-	
-	public addNumberOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(MessageCommandOptionType.NUMBER));
-		this.options.push(option);
-		return this;
-	}
-	
-	public addBooleanOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(MessageCommandOptionType.BOOLEAN));
+
+	public addStringOption(composer: (option: MessageCommandStringOption) => MessageCommandStringOption) {
+		const option = composer(new MessageCommandStringOption());
 		this.options.push(option);
 		return this;
 	}
 
-	public addMentionableOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(MessageCommandOptionType.MENTIONABLE));
+	public addNumberOption(composer: (option: MessageCommandNumberOption) => MessageCommandNumberOption) {
+		const option = composer(new MessageCommandNumberOption());
 		this.options.push(option);
 		return this;
 	}
 
-	public toRegex(messagePrefix: string) {
-		const stringifiedOptionTypes = this.options
-			.map(option => {
-				switch (option.type) {
-					case MessageCommandOptionType.STRING:
-						return `(\\w+)`;
-					case MessageCommandOptionType.NUMBER:
-						return `(\\d+)`;
-					case MessageCommandOptionType.BOOLEAN:
-						return `(true|false)`;
-					case MessageCommandOptionType.MENTIONABLE:
-						return `<@!?(\\d+)>`;
-				}
-			})
-			.join("\\s");
+	public addBooleanOption(composer: (option: MessageCommandBooleanOption) => MessageCommandBooleanOption) {
+		const option = composer(new MessageCommandBooleanOption());
+		this.options.push(option);
+		return this;
+	}
 
-		return new RegExp(
-			`^${messagePrefix}(${this.name}${this.aliases.length > 0 ? `|${this.aliases.join("|")}` : ""})${
-				this.options.length > 0 ? `\\s${stringifiedOptionTypes}` : ""
-			}$`,
-			"gm"
-		);
+	public addMentionableOption(
+		composer: (option: MessageCommandMentionableOption) => MessageCommandMentionableOption
+	) {
+		const option = composer(new MessageCommandMentionableOption());
+		this.options.push(option);
+		return this;
+	}
+
+	public addChannelOption(composer: (option: MessageCommandChannelOption) => MessageCommandChannelOption) {
+		const option = composer(new MessageCommandChannelOption());
+		this.options.push(option);
+		return this;
+	}
+
+	public toRegex(prefix: string) {
+		const regexHelper = new RegexBuilder(this);
+		return regexHelper.build(prefix);
 	}
 }
