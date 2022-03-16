@@ -1,6 +1,6 @@
 import { PermissionResolvable } from 'discord.js';
 
-import { MessageCommandOption, OptionType } from './';
+import { MessageCommandOption, MessageCommandOptionType } from './';
 
 export interface MessageCommandBuilderData {
 	name: string;
@@ -77,42 +77,42 @@ export class MessageCommandBuilder {
 		this.permissions = permissions;
 		return this;
 	}
-
+	
 	public addStringOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(OptionType.STRING));
+		const option = composer(new MessageCommandOption(MessageCommandOptionType.STRING));
 		this.options.push(option);
 		return this;
 	}
-
+	
 	public addNumberOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(OptionType.NUMBER));
+		const option = composer(new MessageCommandOption(MessageCommandOptionType.NUMBER));
 		this.options.push(option);
 		return this;
 	}
-
+	
 	public addBooleanOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(OptionType.BOOLEAN));
+		const option = composer(new MessageCommandOption(MessageCommandOptionType.BOOLEAN));
 		this.options.push(option);
 		return this;
 	}
 
 	public addMentionableOption(composer: (option: MessageCommandOption) => MessageCommandOption) {
-		const option = composer(new MessageCommandOption(OptionType.MENTIONABLE));
+		const option = composer(new MessageCommandOption(MessageCommandOptionType.MENTIONABLE));
 		this.options.push(option);
 		return this;
 	}
 
 	public toRegex(messagePrefix: string) {
-		const optionTypes = this.options
+		const stringifiedOptionTypes = this.options
 			.map(option => {
 				switch (option.type) {
-					case OptionType.STRING:
+					case MessageCommandOptionType.STRING:
 						return `(\\w+)`;
-					case OptionType.NUMBER:
+					case MessageCommandOptionType.NUMBER:
 						return `(\\d+)`;
-					case OptionType.BOOLEAN:
+					case MessageCommandOptionType.BOOLEAN:
 						return `(true|false)`;
-					case OptionType.MENTIONABLE:
+					case MessageCommandOptionType.MENTIONABLE:
 						return `<@!?(\\d+)>`;
 				}
 			})
@@ -120,7 +120,7 @@ export class MessageCommandBuilder {
 
 		return new RegExp(
 			`^${messagePrefix}(${this.name}${this.aliases.length > 0 ? `|${this.aliases.join("|")}` : ""})${
-				this.options.length > 0 ? `\\s${optionTypes}` : ""
+				this.options.length > 0 ? `\\s${stringifiedOptionTypes}` : ""
 			}$`,
 			"gm"
 		);
