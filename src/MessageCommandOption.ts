@@ -1,16 +1,14 @@
 /**
  * A composable option/argument to add to a message command.
  */
-export class MessageCommandOption {
+export abstract class MessageCommandOption {
 	public name: string;
 	public description: string;
-	public choices: unknown[];
-	public type: MessageCommandOptionType;
+	public readonly type: MessageCommandOptionType;
 
 	public constructor(type: MessageCommandOptionType) {
 		this.name = "No name implemented";
 		this.description = "No description implemented";
-		this.choices = [];
 		this.type = type;
 	}
 
@@ -41,56 +39,54 @@ export class MessageCommandOption {
 		this.description = description;
 		return this;
 	}
+}
 
-	public setType(type: MessageCommandOptionType) {
-		this.type = type;
-		return this;
+export abstract class MessageCommandOptionChoiceable<T extends string | number> extends MessageCommandOption {
+	public choices: MessageCommandOptionChoice<T>[];
+
+	public constructor(type: MessageCommandOptionType) {
+		super(type);
+		this.choices = [];
 	}
 
-	/**
-	 * Add a choice, which restricts an option to a specific value.
-	 *
-	 * Similar to discord.js' `SlashCommandOption.addChoice` method.
-	 *
-	 * Use either this or {@link MessageCommandOption.setChoices}.
-	 * @param choice An available choice for the option
-	 * @returns The option instance.
-	 */
-	public addChoice(choice: [name: string, value: string]) {
-		if (choice.every(c => c === "")) {
-			throw new Error("You must provide a name and value for the option choice.");
-		}
-
-		if (choice[0] === "") {
-			throw new Error("You must provide a name for the option choice.");
-		}
-
-		if (choice[1] === "") {
-			throw new Error("You must provide a value for the option choice.");
-		}
-
+	public addChoice(choice: MessageCommandOptionChoice<T>) {
 		this.choices.push(choice);
 		return this;
 	}
 
-	/**
-	 * Set some choices, which restricts an option to specific values.
-	 *
-	 * Similar to discord.js' `SlashCommandOption.setChoices` method.
-	 *
-	 * Use either this or {@link MessageCommandOption.addChoice}.
-	 * @param choices The available choices for the option.
-	 * @returns The option instance.
-	 */
-	public setChoices(choices: [name: string, value: string][]) {
-        choices.forEach(choice => {
-            if (choice.every(c => c === "")) {
-                throw new Error("You must provide a name and value for every option choice.");
-            }
-        })
-
+	public setChoices(choices: MessageCommandOptionChoice<T>[]) {
 		this.choices = choices;
 		return this;
+	}
+}
+
+export class MessageCommandStringOption extends MessageCommandOptionChoiceable<string> {
+	public constructor() {
+		super(MessageCommandOptionType.STRING);
+	}
+}
+
+export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<number> {
+	public constructor() {
+		super(MessageCommandOptionType.NUMBER);
+	}
+}
+
+export class MessageCommandBooleanOption extends MessageCommandOption {
+	public constructor() {
+		super(MessageCommandOptionType.BOOLEAN);
+	}
+}
+
+export class MessageCommandMentionableOption extends MessageCommandOption {
+	public constructor() {
+		super(MessageCommandOptionType.MENTIONABLE);
+	}
+}
+
+export class MessageCommandChannelOption extends MessageCommandOption {
+	public constructor() {
+		super(MessageCommandOptionType.CHANNEL);
 	}
 }
 
@@ -102,14 +98,7 @@ export const enum MessageCommandOptionType {
 	NUMBER = "number",
 	STRING = "text",
 	MENTIONABLE = "mention",
+	CHANNEL = "channel",
 }
 
-/**
- * An enum similar to {@link MessageCommandOptionType}, but for developer ease.
- */
-export const enum OptionType_DEV {
-	BOOLEAN = "boolean",
-	NUMBER = "number",
-	STRING = "string",
-	MENTIONABLE = "mentionable",
-}
+export type MessageCommandOptionChoice<ValueType extends string | number> = [name: string, value: ValueType];
