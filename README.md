@@ -2,29 +2,80 @@
 
 ## Description
 
-A utility package to help you construct and validate message commands for discord.js.
+A utility package to help you construct and validate message commands for [discord.js](https://discord.js.org/#/).
 
 ## Background
 
-Message commands are far inferior to slash commands for both the developer/user.
+Ever since discord.js v13, slash commands have been far superior for both the developers and users, and for good reason.
 
-Due to many problems, it becomes hard to:
+Using classic message commands, it becomes hard to:
 
 -   Parse commands into reliable, consistent formats
--   Check for _many_ edge cases (e.g. spacing between each argument, missing arguments, etc.)
+-   Handle _way_ too many edge cases (e.g. spacing between each argument, missing arguments, etc.)
 -   Validate argument types (dear god)
 -   Restrict specific arguments to certain defined values (e.g. only allow certain roles, a specific number etc.)
--   Find a proper way to create/manage commands
+-   Create/manage commands in a scalable way
 -   Handle permission/role descrepancies
 -   _and a lot more..._ you know what I'm talking about.
 
-Of course, all these problems have been acknowledged by the community, as messages simply weren't meant to be used in a command-based way.
+While these problems have been widely acknowledged by the community, they are still a pain to deal with, as other packages don't quite hit the mark in terms of ease of use, e.g. consistency with discord.js, robustness etc.
 
-This package aims to provide a safe and easy way to manage, create, and validate message commands, including utility components to help with the process.
+This package aims to provide a safe and easy way to manage, create, and validate message commands, with an architecture reminiscent of discord.js' slash command builders. It also includes additional utility components you may find useful.
 
-This was heavily inspired by discord.js' builder pattern for slash commands.
+> _Note: This package tries to be as unopinionated as possible, but the only caveat is that it follows [discord.js' guide on managing file structure,](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) which may not be what you use._
 
-> _Note: This package tries to be as unopinionated as possible, but I will recommend certain aspects that may conflict with your project structure. It will also follow the discord.js guide on how to manage your file structure._
+### Defining a command the naive way:
+
+```ts
+// bot-setup.ts
+client.on("messageCreate", async message => {
+	if (message.author.bot) return;
+	// handles DMs
+	if (!message.guild) return;
+
+	const args = message.content.trim().split(" ");
+
+	if (args[0] === `${MESSAGE_PREFIX}ping`) {
+		await message.channel.send("Pong!");
+		// code execution....
+	}
+
+	if (args[0] === `${MESSAGE_PREFIX}bees`) {
+		await message.channel.send("I like bees");
+		// other code execution....
+	}
+});
+```
+
+How discord.js handles slash commands:
+
+```ts
+module.exports = {
+	builder: new SlashCommandBuilder().setName("foo").setDescription("bar"),
+
+	execute: async interaction => {
+		// some code here...
+	},
+};
+```
+
+This package follows a similar pattern:
+
+```ts
+module.exports = {
+	builder: new MessageCommandBuilder().setName("foo").setDescription("bar"),
+
+	execute: async message => {
+		// some code here...
+	},
+};
+```
+
+## Features
+
+-   Create robust and easily testable message commands
+-   Uses a discord.js-esque builder system
+-   Built-in parser to parse strings into numbers, booleans, mentionables, etc.
 
 ## Installation
 
@@ -42,49 +93,7 @@ npm install djs-message-commands
 
 ## Documentation
 
-Read the documentation here!
+Read the in-depth documentation here!
 
-### Defining a simple command:
-
-TypeScript:
-
-```ts
-// ./commands/ping.ts
-import { MessageCommandBuilder, MessageCommandData } from "djs-message-commands";
-
-const command: MessageCommandData = {
-    // similar to SlashCommandBuilder
-    builder: new MessageCommandBuilder()
-        .setName("ping")
-        .setDescription("A ping command."),
-
-    execute: async (helper: MessageCommandHelper) => {
-        await helper.message.reply("Pong!");
-    }
-}
-
-module.exports = command;
-
-...
-
-// bot-setup.ts
-import { MessageCommandData, MessageCommandData } from "djs-message-commands";
-
-client.on("messageCreate", async message => {
-    if (message.author.bot) return;
-
-    if (message.content.startsWith(MESSAGE_PREFIX)) {
-        // quick example; don't actually hard-code the route
-        const command = require("./commands/ping") as MessageCommandData;
-        const helper = new MessageCommandHelper(message);
-
-        await command.execute(helper);
-    }
-});
-```
-
-JavaScript:
-
-```js
-const { MessageCommandBuilder } = require("djs-message-commands");
-```
+## License
+MIT
