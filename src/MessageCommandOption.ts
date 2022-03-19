@@ -1,3 +1,9 @@
+export interface MessageCommandOptionData {
+	name: string;
+	description: string;
+	readonly type: MessageCommandOptionType;
+}
+
 /**
  * A composable option/argument to add to a message command.
  */
@@ -6,17 +12,12 @@ export abstract class MessageCommandOption {
 	public description: string;
 	public readonly type: MessageCommandOptionType;
 
-	public constructor(type: MessageCommandOptionType) {
-		this.name = "No name implemented";
-		this.description = "No description implemented";
-		this.type = type;
+	public constructor(data: MessageCommandOptionType | MessageCommandOptionData) {
+		this.name = typeof data === "object" ? data.name : "No name implemented";
+		this.description = typeof data === "object" ? data.description : "No description implemented";
+		this.type = typeof data === "object" ? data.type : data;
 	}
 
-	/**
-	 * Set the name of the option
-	 * @param name The name of the option.
-	 * @returns The option instance.
-	 */
 	public setName(name: string) {
 		if (name === "") {
 			throw new Error("Option name must be at least one character long.");
@@ -26,11 +27,6 @@ export abstract class MessageCommandOption {
 		return this;
 	}
 
-	/**
-	 * Set the description of the option.
-	 * @param description The description of the option.
-	 * @returns The option instance.
-	 */
 	public setDescription(description: string) {
 		if (description === "") {
 			throw new Error("Option description must be at least one character long.");
@@ -38,6 +34,11 @@ export abstract class MessageCommandOption {
 
 		this.description = description;
 		return this;
+	}
+
+	// TODO: Add support for option validating
+	public validate(): boolean {
+		return true;
 	}
 }
 
@@ -49,14 +50,55 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 		this.choices = [];
 	}
 
-	public addChoice(choice: MessageCommandOptionChoice<T>) {
+	/**
+	 * Add a choice for this option. Chain this multiple times to add more options OR use {@link MessageCommandOptionChoiceable.setChoices}.
+	 * @param choice The choice to add.
+	 * @returns The option instance.
+	 */
+	public addChoice(...choice: MessageCommandOptionChoice<T>) {
+		if (choice.length <= 0) {
+			throw new Error("There must be at least one choice provided in the array.");
+		}
+
+		if (choice.every(c => c === "")) {
+			throw new Error("You must provide a name and value for the option choice.");
+		}
+
+		if (choice[0] === "") {
+			throw new Error("You must provide a name for the option choice.");
+		}
+
+		if (choice[1] === "") {
+			throw new Error("You must provide a value for the option choice.");
+		}
+
 		this.choices.push(choice);
 		return this;
 	}
 
+	/**
+	 * Add multiple choices for this option. Use this either once OR chain {@link MessageCommandOptionChoiceable.addChoice}.
+	 * @param choices The choices to add.
+	 * @returns	The option instance.
+	 */
 	public setChoices(choices: MessageCommandOptionChoice<T>[]) {
+		if (choices.length <= 0) {
+			throw new Error("You must provide at least one choice.");
+		}
+
+		for (const choice of choices) {
+			if (choice.some(c => c === "")) {
+				throw new Error("You must provide a name and value for every option choice.");
+			}
+		}
+
 		this.choices = choices;
 		return this;
+	}
+
+	
+	public override validate() {
+		return true;
 	}
 }
 
@@ -91,7 +133,7 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 }
 
 /**
- * An enum containing user-friendly aliases for the option types.
+ * An enum containing user-friendly values for each type.
  */
 export const enum MessageCommandOptionType {
 	BOOLEAN = "true/false",
