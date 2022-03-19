@@ -1,11 +1,14 @@
-import { PermissionResolvable } from 'discord.js';
+import { Message, PermissionResolvable } from "discord.js";
 
-import { MessageCommandOption, MessageCommandOptionType } from './';
+import { roleMention } from "@discordjs/builders";
+
+import { MessageCommandOption } from "./";
 import {
     MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMentionableOption,
-    MessageCommandNumberOption, MessageCommandStringOption
-} from './MessageCommandOption';
-import { RegexBuilder } from './RegexHelper';
+    MessageCommandNumberOption, MessageCommandOptionChoiceable, MessageCommandOptionType,
+    MessageCommandStringOption
+} from "./MessageCommandOption";
+
 
 export interface MessageCommandBuilderData {
 	name: string;
@@ -14,7 +17,6 @@ export interface MessageCommandBuilderData {
 	options?: MessageCommandOption[];
 	roleIds?: string[];
 	permissions?: PermissionResolvable[];
-	regex?: RegExp;
 }
 
 export class MessageCommandBuilder {
@@ -115,8 +117,75 @@ export class MessageCommandBuilder {
 		return this;
 	}
 
-	public toRegex(prefix: string) {
-		const regexHelper = new RegexBuilder(this);
-		return regexHelper.build(prefix);
+	public toRegex(prefix: string): RegExp {
+		const aliases = this.aliases.length > 0 ? `|${this.aliases.join("|")}` : "";
+		let regex = `${prefix}(${this.name}${aliases})`;
+
+		for (const option of this.options) {
+			regex += `\\s`;
+
+			if (option instanceof MessageCommandOptionChoiceable) {
+				if (option.choices.length <= 0) {
+					switch (option.type) {
+						case MessageCommandOptionType.STRING:
+							regex += `(\\w+)`;
+							break;
+						case MessageCommandOptionType.NUMBER:
+							regex += `(\\d+)`;
+							break;
+					}
+				} else {
+					regex += `(${option.choices.map(c => c[1]).join("|")})`;
+				}
+
+				continue;
+			}
+
+			switch (option.type) {
+				case MessageCommandOptionType.BOOLEAN:
+					regex += `(true)`;
+					break;
+				case MessageCommandOptionType.MENTIONABLE:
+					regex += `<@!?(\\d+)>`;
+					break;
+				case MessageCommandOptionType.CHANNEL:
+					regex += `<#(\\d+)>`;
+					break;
+			}
+		}
+
+		return new RegExp(`^${regex}$`, "gm");
+	}
+
+	public validate(message: Message, prefix: string) {
+		const errors: string[] = [];
+
+		for (const perm of this.permissions) {
+			if (!message.member!.permissions.has(perm)) {
+				errors.push(`Missing permission: ${perm}`);
+			}
+		}
+
+		checkingRoles: for (const id of this.roleIds) {
+			if (!message.guild!.roles.cache.has(id)) {
+				continue checkingRoles;
+			}
+
+			if (!message.member!.roles.cache.has(id)) {
+				errors.push(`Missing role: ${roleMention(id)}`);
+			}
+		}
+
+		// TODO:  Add support for option validating
+		for (const option of this.options) {
+			if (!option.validate()) {
+				errors.push(option.name);
+			}
+		}
+
+		const expectedRegex = this.toRegex(prefix);
+		// console.log(message.content.match(expectedRegex));
+
+		return errors;
 	}
 }
