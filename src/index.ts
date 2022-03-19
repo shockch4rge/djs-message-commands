@@ -1,2 +1,13 @@
 export { MessageCommandBuilder, MessageCommandBuilderData } from "./MessageCommandBuilder";
-export { MessageCommandOption, MessageCommandOptionType, OptionType_DEV } from "./MessageCommandOption";
+export {
+	MessageCommandOption,
+	MessageCommandOptionData,
+	MessageCommandOptionType,
+	MessageCommandOptionChoiceable,
+	MessageCommandBooleanOption,
+	MessageCommandChannelOption,
+	MessageCommandMentionableOption,
+	MessageCommandNumberOption,
+	MessageCommandOptionChoice,
+	MessageCommandStringOption,
+} from "./MessageCommandOption";
