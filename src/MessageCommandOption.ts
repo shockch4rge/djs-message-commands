@@ -1,3 +1,6 @@
+import { MessageMentions, Snowflake } from "discord.js";
+
+
 export interface MessageCommandOptionData {
 	name: string;
 	description: string;
@@ -36,10 +39,7 @@ export abstract class MessageCommandOption {
 		return this;
 	}
 
-	// TODO: Add support for option validating
-	public validate(): boolean {
-		return true;
-	}
+	public abstract validate(option: string): unknown;
 }
 
 export abstract class MessageCommandOptionChoiceable<T extends string | number> extends MessageCommandOption {
@@ -95,16 +95,22 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 		this.choices = choices;
 		return this;
 	}
-
-	
-	public override validate() {
-		return true;
-	}
 }
 
 export class MessageCommandStringOption extends MessageCommandOptionChoiceable<string> {
 	public constructor() {
 		super(MessageCommandOptionType.STRING);
+	}
+
+	public override validate(option: string): string | undefined {
+		for (const choice of this.choices) {
+			if (choice[1] === option) {
+				return choice[1];
+			}
+		}
+
+		const matches = option.match(/^(".+")$/gi);
+		return matches ? matches[0] : undefined;
 	}
 }
 
@@ -112,23 +118,64 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 	public constructor() {
 		super(MessageCommandOptionType.NUMBER);
 	}
+
+	public override validate(option: string) {
+		const number = Number.parseInt(option);
+		return Number.isNaN(number) ? undefined : number;
+	}
 }
 
 export class MessageCommandBooleanOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.BOOLEAN);
 	}
+
+	public override validate(option: string): boolean | undefined {
+		const matches = option.match(/^(true|false)$/gi);
+
+		if (matches) {
+			if (matches[0] === "true") {
+				return true;
+			}
+			if (matches[0] === "false") {
+				return false;
+			}
+		}
+
+		return undefined;
+	}
 }
 
-export class MessageCommandMentionableOption extends MessageCommandOption {
+export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.MENTIONABLE);
+	}
+
+	public override validate(option: string): Snowflake | undefined {
+		const matches = option.matchAll(MessageMentions.USERS_PATTERN).next().value;
+		return matches ? matches[1] : undefined;
 	}
 }
 
 export class MessageCommandChannelOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.CHANNEL);
+	}
+
+	public override validate(option: string): Snowflake | undefined {
+		const matches = option.matchAll(MessageMentions.CHANNELS_PATTERN).next().value;
+		return matches ? matches[1] : undefined;
+	}
+}
+
+export class MessageCommandRoleOption extends MessageCommandOption {
+	public constructor() {
+		super(MessageCommandOptionType.ROLE);
+	}
+
+	public override validate(option: string): Snowflake | undefined {
+		const matches = option.matchAll(MessageMentions.ROLES_PATTERN).next().value;
+		return matches ? matches[1] : undefined;
 	}
 }
 
@@ -141,6 +188,7 @@ export const enum MessageCommandOptionType {
 	STRING = "text",
 	MENTIONABLE = "mention",
 	CHANNEL = "channel",
+	ROLE = "role",
 }
 
 export type MessageCommandOptionChoice<ValueType extends string | number> = [name: string, value: ValueType];
