@@ -2,12 +2,12 @@ import { Message, PermissionResolvable } from "discord.js";
 
 import { roleMention } from "@discordjs/builders";
 
-import { MessageCommandOption } from "./";
 import {
-    MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMentionableOption,
-    MessageCommandNumberOption, MessageCommandOptionChoiceable, MessageCommandOptionType,
+    MessageCommandBooleanOption, MessageCommandChannelOption,
+    MessageCommandMentionableOption as MessageCommandMemberOption, MessageCommandNumberOption,
+    MessageCommandOption, MessageCommandOptionChoiceable, MessageCommandOptionType,
     MessageCommandStringOption
-} from "./MessageCommandOption";
+} from "./";
 
 
 export interface MessageCommandBuilderData {
@@ -103,10 +103,10 @@ export class MessageCommandBuilder {
 		return this;
 	}
 
-	public addMentionableOption(
-		composer: (option: MessageCommandMentionableOption) => MessageCommandMentionableOption
+	public addMemberOption(
+		composer: (option: MessageCommandMemberOption) => MessageCommandMemberOption
 	) {
-		const option = composer(new MessageCommandMentionableOption());
+		const option = composer(new MessageCommandMemberOption());
 		this.options.push(option);
 		return this;
 	}
@@ -119,16 +119,17 @@ export class MessageCommandBuilder {
 
 	public toRegex(prefix: string): RegExp {
 		const aliases = this.aliases.length > 0 ? `|${this.aliases.join("|")}` : "";
+
 		let regex = `${prefix}(${this.name}${aliases})`;
 
 		for (const option of this.options) {
-			regex += `\\s`;
+			regex += `\\s+`;
 
 			if (option instanceof MessageCommandOptionChoiceable) {
 				if (option.choices.length <= 0) {
 					switch (option.type) {
 						case MessageCommandOptionType.STRING:
-							regex += `(\\w+)`;
+							regex += `"(.+)"`;
 							break;
 						case MessageCommandOptionType.NUMBER:
 							regex += `(\\d+)`;
@@ -151,41 +152,56 @@ export class MessageCommandBuilder {
 				case MessageCommandOptionType.CHANNEL:
 					regex += `<#(\\d+)>`;
 					break;
+				case MessageCommandOptionType.ROLE:
+					regex += `<@&(\\d+)>`;
 			}
 		}
 
 		return new RegExp(`^${regex}$`, "gm");
 	}
 
-	public validate(message: Message, prefix: string) {
-		const errors: string[] = [];
+	public validate(message: Message) {
+		const permissionErrors: string[] = [];
+		const roleErrors: string[] = [];
+		const optionErrors: string[] = [];
+		const options: unknown[] = [];
+		const messageArgs = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
-				errors.push(`Missing permission: ${perm}`);
+				permissionErrors.push(`Missing permission: ${perm}`);
 			}
 		}
 
-		checkingRoles: for (const id of this.roleIds) {
+		for (const id of this.roleIds) {
 			if (!message.guild!.roles.cache.has(id)) {
-				continue checkingRoles;
+				continue;
 			}
 
 			if (!message.member!.roles.cache.has(id)) {
-				errors.push(`Missing role: ${roleMention(id)}`);
+				roleErrors.push(`Missing role: ${roleMention(id)}`);
 			}
 		}
 
-		// TODO:  Add support for option validating
-		for (const option of this.options) {
-			if (!option.validate()) {
-				errors.push(option.name);
+		for (let i = 0; i < this.options.length; i++) {
+			const option = this.options[i];
+			const result = option.validate(messageArgs[i]);
+
+			if (!result !== undefined) {
+				optionErrors.push(`Invalid option: ${option.name}`);
+				continue;
 			}
+
+			options.push(result);
 		}
 
-		const expectedRegex = this.toRegex(prefix);
-		// console.log(message.content.match(expectedRegex));
-
-		return errors;
+		return {
+			options,
+			errors: {
+				permission: permissionErrors,
+				role: roleErrors,
+				option: optionErrors,
+			},
+		};
 	}
 }
