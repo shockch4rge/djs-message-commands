@@ -6,7 +6,7 @@ export {
 	MessageCommandOptionChoiceable,
 	MessageCommandBooleanOption,
 	MessageCommandChannelOption,
-	MessageCommandMentionableOption,
+	MessageCommandMemberOption,
 	MessageCommandNumberOption,
 	MessageCommandOptionChoice,
 	MessageCommandStringOption,
