@@ -3,10 +3,9 @@ import { Message, PermissionResolvable } from "discord.js";
 import { roleMention } from "@discordjs/builders";
 
 import {
-    MessageCommandBooleanOption, MessageCommandChannelOption,
-    MessageCommandMentionableOption as MessageCommandMemberOption, MessageCommandNumberOption,
-    MessageCommandOption, MessageCommandOptionChoiceable, MessageCommandOptionType,
-    MessageCommandStringOption
+    MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMemberOption,
+    MessageCommandNumberOption, MessageCommandOption, MessageCommandOptionChoiceable,
+    MessageCommandOptionType, MessageCommandStringOption
 } from "./";
 
 
@@ -103,9 +102,7 @@ export class MessageCommandBuilder {
 		return this;
 	}
 
-	public addMemberOption(
-		composer: (option: MessageCommandMemberOption) => MessageCommandMemberOption
-	) {
+	public addMemberOption(composer: (option: MessageCommandMemberOption) => MessageCommandMemberOption) {
 		const option = composer(new MessageCommandMemberOption());
 		this.options.push(option);
 		return this;
@@ -165,7 +162,7 @@ export class MessageCommandBuilder {
 		const roleErrors: string[] = [];
 		const optionErrors: string[] = [];
 		const options: unknown[] = [];
-		const messageArgs = message.content.trim().split(/\s+/).slice(1);
+		const args = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
@@ -183,16 +180,20 @@ export class MessageCommandBuilder {
 			}
 		}
 
-		for (let i = 0; i < this.options.length; i++) {
-			const option = this.options[i];
-			const result = option.validate(messageArgs[i]);
+		if (args.length === this.options.length) {
+			for (let i = 0; i < this.options.length; i++) {
+				const option = this.options[i];
+				const result = option.validate(args[i]);
 
-			if (!result !== undefined) {
-				optionErrors.push(`Invalid option: ${option.name}`);
-				continue;
+				if (result === undefined) {
+					optionErrors.push(`Invalid option: ${option.name}`);
+					continue;
+				}
+
+				options.push(result);
 			}
-
-			options.push(result);
+		} else {
+			optionErrors.push("The number of arguments provided does not match the number of options.");
 		}
 
 		return {
