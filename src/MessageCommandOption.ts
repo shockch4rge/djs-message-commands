@@ -109,8 +109,8 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 			}
 		}
 
-		const matches = option.match(/^(".+")$/gi);
-		return matches ? matches[0] : undefined;
+		const matches = option.matchAll(/^"(.+)"$/gi).next().value;
+		return matches ? matches[1] : undefined;
 	}
 }
 
