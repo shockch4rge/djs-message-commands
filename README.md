@@ -24,32 +24,13 @@ This package aims to provide a safe and easy way to manage, create, and validate
 
 > _Note: This package tries to be as unopinionated as possible, but the only caveat is that it follows [discord.js' guide on managing file structure,](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) which may not be what you use._
 
-### Defining a command the naive way:
+
+## Usage
+
+How discord.js recommends structuring slash commands:
 
 ```ts
-// bot-setup.ts
-client.on("messageCreate", async message => {
-	if (message.author.bot) return;
-	// handles DMs
-	if (!message.guild) return;
-
-	const args = message.content.trim().split(" ");
-
-	if (args[0] === `${MESSAGE_PREFIX}ping`) {
-		await message.channel.send("Pong!");
-		// code execution....
-	}
-
-	if (args[0] === `${MESSAGE_PREFIX}bees`) {
-		await message.channel.send("I like bees");
-		// other code execution....
-	}
-});
-```
-
-How discord.js handles slash commands:
-
-```ts
+// **/commands/slash/foo.ts
 module.exports = {
 	builder: new SlashCommandBuilder().setName("foo").setDescription("bar"),
 
@@ -62,6 +43,7 @@ module.exports = {
 This package follows a similar pattern:
 
 ```ts
+// **/commands/message/foo.ts
 module.exports = {
 	builder: new MessageCommandBuilder().setName("foo").setDescription("bar"),
 
@@ -69,6 +51,56 @@ module.exports = {
 		// some code here...
 	},
 };
+```
+
+```ts
+// index.ts
+const bot = new Client({
+	intents: // intents...
+});
+
+const commands = new Collection();
+
+// saving the commands defined in the 'commands' directory
+for (const file of fs.readdirSync("./commands/message")) {
+	const command = require(`./commands/message/${file}`);
+	// use the builder's name as the key
+	commands.set(command.builder.name, command);
+
+	// set any aliases the command may have with the same builder
+	for (const alias of command.builder.aliases) {
+		commands.set(alias, command);
+	}
+}
+
+bot.on("messageCreate", async message => {
+	if (message.author.bot) return;
+
+	const args = message.content.trim().split(/\s+/);
+	if (args[0].slice(0, PREFIX.length) !== PREFIX) return;
+
+	const commandName = args[0].slice(PREFIX.length);
+	const command = commands.get(commandName);
+
+	if (!command) {
+		// handle command not found...
+		return;
+	};
+
+	await message.channel.sendTyping();
+
+	// get any errors, and parse the arguments the message may have into options
+	const { errors, options } = command.builder.validate(message);
+
+	//TODO: write documentation for handling errors
+
+	try {
+		await command.execute(message, )
+	}
+	catch (err) {
+		// handle error...
+	}
+})
 ```
 
 ## Features
@@ -95,5 +127,10 @@ npm install djs-message-commands
 
 Read the in-depth documentation here!
 
+## Contribution
+
+If you have any suggestions, please open an issue or pull request on the [GitHub repository](https://github.com/Shockch4rge/djs-message-commands)!
+
 ## License
+
 MIT
