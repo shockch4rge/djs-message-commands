@@ -30,6 +30,20 @@ This package aims to provide a safe and easy way to manage, create, and validate
 - Required options are not supported as of now. They might come in a later release.
 - While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide as most of the code will be similar to theirs.
 
+## Installation
+
+yarn:
+
+```
+yarn add djs-message-commands
+```
+
+npm:
+
+```
+npm install djs-message-commands
+```
+
 ## Usage
 
 Read the in-depth documentation [here]! (WIP)
@@ -214,20 +228,6 @@ const builder = new MessageCommandBuilder()
 
 console.log(builder.toRegex());
 // /^>>(test|t|TEST)\s+"(.+)"\s+(\d+)\s+(true|false)\s+<@!?(\d{17,19})>$/gm
-```
-
-## Installation
-
-yarn:
-
-```
-yarn add djs-message-commands
-```
-
-npm:
-
-```
-npm install djs-message-commands
 ```
 
 ## Contribution
