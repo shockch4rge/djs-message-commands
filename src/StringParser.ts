@@ -1,34 +1,24 @@
-import { MessageMentions, Snowflake } from 'discord.js';
+import { MessageMentions, Snowflake } from "discord.js";
+
 
 export class StringParser {
-	public parse(string: string): string | number | boolean {
-		const isBoolean = this.toBoolean(string);
-		const isNumber = this.toNumber(string);
-		const isFloat = this.toFloat(string);
-		const isMemberId = this.toMemberId(string);
-		const isChannelId = this.toChannelId(string);
+	public parse(string: string): string | Snowflake | number | boolean {
+		const parsers = [
+			this.toBoolean,
+			this.toNumber,
+			this.toFloat,
+			this.toMemberId,
+			this.toRoleId,
+			this.toChannelId,
+		];
 
-		if (isBoolean !== undefined) {
-			return isBoolean;
+		const results = parsers.map(parse => parse(string)).filter(value => value !== undefined);
+
+		if (results.length <= 0) {
+			return string;
 		}
 
-		if (isNumber) {
-			return isNumber;
-		}
-
-		if (isFloat) {
-			return isFloat;
-		}
-
-		if (isMemberId) {
-			return isMemberId;
-		}
-
-		if (isChannelId) {
-			return isChannelId;
-		}
-
-		return string;
+		return results[0]!;
 	}
 
 	public toBoolean(string: string) {
@@ -68,6 +58,16 @@ export class StringParser {
 
 	public toMemberId(string: string): Snowflake | undefined {
 		const matches = string.matchAll(MessageMentions.USERS_PATTERN).next().value;
+
+		if (!matches) {
+			return undefined;
+		}
+
+		return matches[1] as Snowflake;
+	}
+
+	public toRoleId(string: string): Snowflake | undefined {
+		const matches = string.matchAll(MessageMentions.ROLES_PATTERN).next().value;
 
 		if (!matches) {
 			return undefined;
