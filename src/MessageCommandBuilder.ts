@@ -126,14 +126,14 @@ export class MessageCommandBuilder {
 				if (option.choices.length <= 0) {
 					switch (option.type) {
 						case MessageCommandOptionType.STRING:
-							regex += `"(.+)"`;
+							regex += `\"(.+)\"`;
 							break;
 						case MessageCommandOptionType.NUMBER:
 							regex += `(\\d+)`;
 							break;
 					}
 				} else {
-					regex += `(${option.choices.map(c => c[1]).join("|")})`;
+					regex += `\"(${option.choices.map(c => c[1]).join("|")})\"`;
 				}
 
 				continue;
@@ -143,7 +143,7 @@ export class MessageCommandBuilder {
 				case MessageCommandOptionType.BOOLEAN:
 					regex += `(true)`;
 					break;
-				case MessageCommandOptionType.MENTIONABLE:
+				case MessageCommandOptionType.MEMBER:
 					regex += `<@!?(\\d+)>`;
 					break;
 				case MessageCommandOptionType.CHANNEL:
@@ -161,7 +161,7 @@ export class MessageCommandBuilder {
 		const permissionErrors: string[] = [];
 		const roleErrors: string[] = [];
 		const optionErrors: string[] = [];
-		const options: unknown[] = [];
+		const parsedOptions: unknown[] = [];
 		const args = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
@@ -190,14 +190,15 @@ export class MessageCommandBuilder {
 					continue;
 				}
 
-				options.push(result);
+				parsedOptions.push(result);
 			}
-		} else {
-			optionErrors.push("The number of arguments provided does not match the number of options.");
+		}
+		else {
+			optionErrors.push("The number of arguments provided does not match the number of parsedOptions.");
 		}
 
 		return {
-			options,
+			options: parsedOptions,
 			errors: {
 				permission: permissionErrors,
 				role: roleErrors,
