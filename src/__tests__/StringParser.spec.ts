@@ -1,4 +1,5 @@
-import { StringParser } from '../StringParser';
+import { StringParser } from "../StringParser";
+
 
 const parser = new StringParser();
 
@@ -34,6 +35,12 @@ describe("StringParser", () => {
 
 		expect(parser.parse(string)).toBe("123456789012345678");
 	});
+
+	it("parse a role mention into a role ID", () => {
+		const string = "<@&123456789012345678>";
+
+		expect(parser.parse(string)).toBe("123456789012345678");
+	})
 
 	it("parse a string into multiple types", () => {
 		const string = "string 10 true false <@!123456789012345678> <#123456789012345678>".trim().split(" ");
