@@ -9,10 +9,20 @@ export interface MessageCommandOptionData {
 
 /**
  * A composable option/argument to add to a message command.
+ * @abstract
  */
 export abstract class MessageCommandOption {
+	/**
+	 * The name of the option.
+	 */
 	public name: string;
+	/**
+	 * The description of the option.
+	 */
 	public description: string;
+	/**
+	 * The type of the option.
+	 */
 	public readonly type: MessageCommandOptionType;
 
 	public constructor(data: MessageCommandOptionType | MessageCommandOptionData) {
@@ -21,6 +31,11 @@ export abstract class MessageCommandOption {
 		this.type = typeof data === "object" ? data.type : data;
 	}
 
+	/**
+	 * Sets the name of the option. Cannot be empty.
+	 * @param name The name of the option.
+	 * @returns The option instance.
+	 */
 	public setName(name: string) {
 		if (name === "") {
 			throw new Error("Option name must be at least one character long.");
@@ -30,6 +45,11 @@ export abstract class MessageCommandOption {
 		return this;
 	}
 
+	/**
+	 * Sets the name of the option. Cannot be empty.
+	 * @param description The description of the option.
+	 * @returns The option instance.
+	 */
 	public setDescription(description: string) {
 		if (description === "") {
 			throw new Error("Option description must be at least one character long.");
@@ -39,10 +59,22 @@ export abstract class MessageCommandOption {
 		return this;
 	}
 
+	/**
+	 * Performs a type-specific validation on the option.
+	 * @param option The option to compare to.
+	 */
 	public abstract validate(option: string): unknown;
 }
 
+/**
+ * A option that can be supplied with pre-defined values for the user to choose from.
+ * @abstract
+ * @extends MessageCommandOption
+ */
 export abstract class MessageCommandOptionChoiceable<T extends string | number> extends MessageCommandOption {
+	/**
+	 * The available pre-determined choices for this option.
+	 */
 	public choices: MessageCommandOptionChoice<T>[];
 
 	public constructor(type: MessageCommandOptionType) {
@@ -97,6 +129,10 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	}
 }
 
+/**
+ * A string option. Allows choices.
+ * @extends MessageCommandOptionChoiceable
+ */
 export class MessageCommandStringOption extends MessageCommandOptionChoiceable<string> {
 	public constructor() {
 		super(MessageCommandOptionType.STRING);
@@ -114,6 +150,10 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 	}
 }
 
+/**
+ * A number option. Allows choices.
+ * @extends MessageCommandOptionChoiceable
+ */
 export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<number> {
 	public constructor() {
 		super(MessageCommandOptionType.NUMBER);
@@ -125,6 +165,10 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 	}
 }
 
+/**
+ * A boolean option.
+ * @extends MessageCommandOption
+ */
 export class MessageCommandBooleanOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.BOOLEAN);
@@ -146,6 +190,10 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 	}
 }
 
+/**
+ * A member mentionable option.
+ * @extends MessageCommandOption
+ */
 export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.MEMBER);
@@ -157,6 +205,10 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 	}
 }
 
+/**
+ * A channel mentionable option.
+ * @extends MessageCommandOption
+ */
 export class MessageCommandChannelOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.CHANNEL);
@@ -168,6 +220,10 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 	}
 }
 
+/**
+ * A role mentionable option.
+ * @extends MessageCommandOption
+ */
 export class MessageCommandRoleOption extends MessageCommandOption {
 	public constructor() {
 		super(MessageCommandOptionType.ROLE);
@@ -180,7 +236,7 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 }
 
 /**
- * An enum containing user-friendly values for each type.
+ * An enum containing user-friendly values for each option type.
  */
 export const enum MessageCommandOptionType {
 	BOOLEAN = "true/false",
@@ -191,4 +247,7 @@ export const enum MessageCommandOptionType {
 	ROLE = "role",
 }
 
+/**
+ * A tuple containing both the name and value for each option choice.
+ */
 export type MessageCommandOptionChoice<ValueType extends string | number> = [name: string, value: ValueType];
