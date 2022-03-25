@@ -100,8 +100,11 @@ describe("MessageCommandOption constructing and testing", () => {
 			option.setName("test-channel-option-name").setDescription("test channel option description")
 		);
 
+		const mockMessage = '>>test-name "lol" 21 true <@!12345123451234512> <#12345123451234512>';
+
 		const expectedRegex =
 			/^>>(test-name|t|TEST)\s+"(.+)"\s+(\d+)\s+(true|false)\s+<@!?(\d{17,19})>\s+<#(\d{17,19})>$/gm;
+		const actualRegex = builder.toRegex(PREFIX);
 
 		expect(builder.name).toBe("test-name");
 		expect(builder.description).toBe("test description");
@@ -124,7 +127,8 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(builder.options[4].name).toBe("test-channel-option-name");
 		expect(builder.options[4].description).toBe("test channel option description");
 		expect(builder.options[4].type).toBe(MessageCommandOptionType.CHANNEL);
-		expect(builder.toRegex(PREFIX)).toEqual(expectedRegex);
+		expect(actualRegex).toEqual(expectedRegex);
+		expect(actualRegex.test(mockMessage)).toBe(true);
 	});
 
 	it("specify multiple string choices and test with regex", () => {
