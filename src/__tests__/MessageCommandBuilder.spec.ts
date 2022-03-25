@@ -117,9 +117,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 
 		const { errors, options } = builder.validate(message);
 
-		expect(errors.permission).toHaveLength(0);
-		expect(errors.role).toHaveLength(0);
-		expect(errors.option).toHaveLength(0);
+		expect(errors).toHaveLength(0);
 
 		expect(options.length).toBe(5);
 		expect(options[0]).toBe("this");
