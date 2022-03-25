@@ -15,6 +15,11 @@
 		"LICENSE",
 		"README.md"
 	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Shockch4rge/djs-message-commands.git"
+	},
+	"homepage": "https://github.com/Shockch4rge/djs-message-commands#readme",
 	"keywords": [
 		"discord",
 		"discord.js",
