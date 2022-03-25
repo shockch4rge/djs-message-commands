@@ -104,6 +104,8 @@ client.on("messageCreate", async message => {
 	// if the prefix doesn't match, ignore the message
 	if (args[0].slice(0, PREFIX.length) !== PREFIX) return;
 
+	await message.channel.sendTyping();
+
 	const commandName = args[0].slice(PREFIX.length);
 	const command = commands.get(commandName);
 
@@ -112,7 +114,6 @@ client.on("messageCreate", async message => {
 		return;
 	};
 
-	await message.channel.sendTyping();
 
 	// get errors and parsed options
 	const { errors, options } = command.builder.validate(message);
@@ -176,8 +177,11 @@ module.exports = {
 	execute: async (client, message, options) => {
 		const [string, number, boolean, memberId, channelId, roleId] = options
 		
-		// to get members/roles/channels, use the fetch() method
+		// any mentionable option (members/roles/channels) will return the target's ID.
+		// to get them, use fetch() or get().
 		const member = await client.users.fetch(memberId);
+		// or
+		const member = await client.users.cache.get(memberId);
 	},
 };
 ```
@@ -188,17 +192,19 @@ Usage with TypeScript:
 import { MessageCommandBuilder } from "djs-message-commands";
 
 module.exports = {
-	builder: ...
+	builder: new MessageCommandBuilder(),
+		// same options defined above...
 
-	// 'options' parameter is of type: unknown[]
+	// the 'options' parameter will be an unknown array
 	execute: async (client, message, options) => {
-		// assert types as you see fit
+		// assert types in the order that you chained them in.
+		// e.g. if you did addStringOption() and then addBooleanOption(), the types order would be [string, boolean].
 		const [string, number, boolean, memberId, channelId, roleId] = options as [string, number, boolean, string, string, string];
 	},
 };
 ```
 
-### The package exposes a utility method toRegex() in the builder class:
+The package exposes a utility method, `toRegex()`, in the builder class:
 ```js
 const builder = new MessageCommandBuilder()
 		.setName("test")
