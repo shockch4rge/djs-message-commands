@@ -10,4 +10,5 @@ export {
 	MessageCommandNumberOption,
 	MessageCommandOptionChoice,
 	MessageCommandStringOption,
+	MessageCommandRoleOption,
 } from "./MessageCommandOption";
