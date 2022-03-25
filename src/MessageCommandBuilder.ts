@@ -158,15 +158,13 @@ export class MessageCommandBuilder {
 	}
 
 	public validate(message: Message) {
-		const permissionErrors: string[] = [];
-		const roleErrors: string[] = [];
-		const optionErrors: string[] = [];
+		const errors: string[] = [];
 		const parsedOptions: unknown[] = [];
 		const args = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
-				permissionErrors.push(`Missing permission: ${perm}`);
+				errors.push(`Missing permission: ${perm}`);
 			}
 		}
 
@@ -176,7 +174,7 @@ export class MessageCommandBuilder {
 			}
 
 			if (!message.member!.roles.cache.has(id)) {
-				roleErrors.push(`Missing role: ${roleMention(id)}`);
+				errors.push(`Missing role: ${roleMention(id)}`);
 			}
 		}
 
@@ -186,23 +184,19 @@ export class MessageCommandBuilder {
 				const result = option.validate(args[i]);
 
 				if (result === undefined) {
-					optionErrors.push(`Invalid option: ${option.name}`);
+					errors.push(`Invalid option: ${option.name}`);
 					continue;
 				}
 
 				parsedOptions.push(result);
 			}
 		} else {
-			optionErrors.push("The number of arguments provided does not match the number of parsedOptions.");
+			errors.push("The number of arguments provided does not match the number of parsedOptions.");
 		}
 
 		return {
 			options: parsedOptions,
-			errors: {
-				permission: permissionErrors,
-				role: roleErrors,
-				option: optionErrors,
-			},
+			errors,
 		};
 	}
 }
