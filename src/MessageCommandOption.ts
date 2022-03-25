@@ -131,7 +131,7 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 	}
 
 	public override validate(option: string): boolean | undefined {
-		const matches = option.match(/^(true|false)$/gi);
+		const matches = option.match(/^(true|false)$/g);
 
 		if (matches) {
 			if (matches[0] === "true") {
@@ -148,7 +148,7 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 
 export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
-		super(MessageCommandOptionType.MENTIONABLE);
+		super(MessageCommandOptionType.MEMBER);
 	}
 
 	public override validate(option: string): Snowflake | undefined {
@@ -186,7 +186,7 @@ export const enum MessageCommandOptionType {
 	BOOLEAN = "true/false",
 	NUMBER = "number",
 	STRING = "text",
-	MENTIONABLE = "mention",
+	MEMBER = "member",
 	CHANNEL = "channel",
 	ROLE = "role",
 }

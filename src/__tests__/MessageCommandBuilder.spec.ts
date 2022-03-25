@@ -52,7 +52,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 		);
 
 		const mockMessage = {
-			content: '>>test-name "string" 12 true <@!2323829327>',
+			content: '>>test-name "string" 12 true <@!12345678901234567>',
 			member: {
 				roles: {
 					cache: new Collection<string, Role>(),
@@ -73,7 +73,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 		expect(options[0]).toBe("string");
 		expect(options[1]).toBe(12);
 		expect(options[2]).toBe(true);
-		expect(options[3]).toBe("2323829327");
+		expect(options[3]).toBe("12345678901234567");
 	});
 
 	it("expect 0 errors from validate() method", () => {
@@ -99,7 +99,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 		);
 
 		const message = {
-			content: '>>test "this" 12 true <@!1234567890> <#1234567890>',
+			content: '>>test "this" 12 true <@!12345678901234567> <#12345678901234567>',
 			guild: {
 				roles: {
 					cache: new Collection<string, Role>()
@@ -125,7 +125,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 		expect(options[0]).toBe("this");
 		expect(options[1]).toBe(12);
 		expect(options[2]).toBe(true);
-		expect(options[3]).toBe("1234567890");
-		expect(options[4]).toBe("1234567890");
+		expect(options[3]).toBe("12345678901234567");
+		expect(options[4]).toBe("12345678901234567");
 	});
 });

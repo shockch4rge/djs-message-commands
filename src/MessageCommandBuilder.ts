@@ -141,16 +141,16 @@ export class MessageCommandBuilder {
 
 			switch (option.type) {
 				case MessageCommandOptionType.BOOLEAN:
-					regex += `(true)`;
+					regex += `(true|false)`;
 					break;
 				case MessageCommandOptionType.MEMBER:
-					regex += `<@!?(\\d+)>`;
+					regex += `<@!?(\\d{17,19})>`;
 					break;
 				case MessageCommandOptionType.CHANNEL:
-					regex += `<#(\\d+)>`;
+					regex += `<#(\\d{17,19})>`;
 					break;
 				case MessageCommandOptionType.ROLE:
-					regex += `<@&(\\d+)>`;
+					regex += `<@&(\\d{17,19})>`;
 			}
 		}
 
@@ -192,8 +192,7 @@ export class MessageCommandBuilder {
 
 				parsedOptions.push(result);
 			}
-		}
-		else {
+		} else {
 			optionErrors.push("The number of arguments provided does not match the number of parsedOptions.");
 		}
 

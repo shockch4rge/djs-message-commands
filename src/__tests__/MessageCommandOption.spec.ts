@@ -100,7 +100,8 @@ describe("MessageCommandOption constructing and testing", () => {
 			option.setName("test-channel-option-name").setDescription("test channel option description")
 		);
 
-		const expectedRegex = /^>>(test-name|t|TEST)\s+"(.+)"\s+(\d+)\s+(true)\s+<@!?(\d+)>\s+<#(\d+)>$/gm;
+		const expectedRegex =
+			/^>>(test-name|t|TEST)\s+"(.+)"\s+(\d+)\s+(true|false)\s+<@!?(\d{17,19})>\s+<#(\d{17,19})>$/gm;
 
 		expect(builder.name).toBe("test-name");
 		expect(builder.description).toBe("test description");
