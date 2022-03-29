@@ -1,8 +1,11 @@
-# MessageCommandOptionChoice<ValueType extends string | number>
+# MessageCommandOptionChoice
+
 <Badge type="tip" text="type" vertical="middle" />
 
-#### Parameters
--  **ValueType**: `string | number`
+#### Type Parameters:
 
-Signature:
+-   \<ValueType extends `string | number`> 
+
+#### Signature:
+
 `[name: string, value: ValueType]`

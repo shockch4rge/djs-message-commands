@@ -1,5 +1,8 @@
-# MessageCommandOption 
-<Badge type="warning" text="abstract" vertical="middle" /> <Badge type="tip" text="class" vertical="middle" />
+# MessageCommandOption
+
+<Badge type="tip" text="abstract" vertical="middle" /> <Badge type="tip" text="class" vertical="middle" />
+
+A composable option/argument to add to a message command.
 
 ## Properties
 
@@ -7,21 +10,27 @@
 
 -   **type**: `string`
 
+The name of the option.
+
 ---
 
 ### **description**
 
 -   **type**: `string`
 
+The description of the option.
+
 ---
 
 ### **type** <Badge type="tip" text="readonly" vertical="middle" />
 
--   **type**: `MessageCommandOptionType`
+-   **type**: [MessageCommandOptionType](MessageCommandOptionType.md)
+
+The type of the option.
 
 ## Methods
 
-### setName(name)
+### **setName**
 
 #### Parameters:
 
@@ -29,6 +38,28 @@
 
 #### Returns:
 
-- `MessageCommandOption
+-   [MessageCommandOption](MessageCommandOption.md)
 
 ---
+
+### **setDescription**
+
+#### Parameters:
+
+-   **name**: `string`
+
+#### Returns:
+
+-   [MessageCommandOption](MessageCommandOption.md)
+
+---
+
+### **validate** <Badge type="tip" text="abstract" vertical="middle" />
+
+#### Parameters:
+
+-   **name**: `string`
+
+#### Returns:
+
+-   `unknown`

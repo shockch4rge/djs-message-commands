@@ -1,21 +1,22 @@
-import { defineConfig } from "vuepress/config";
+import { defineUserConfig } from "vuepress";
 
 import config from "../../package.json";
 
 
-export default defineConfig({
+import type { DefaultThemeOptions } from "vuepress";
+
+export default defineUserConfig<DefaultThemeOptions>({
 	title: `${config.name} v${config.version}`,
 	description: `${config.description}`,
 	themeConfig: {
-		repo: "https://github.com/Shockch4rge/djs-message-commands",
+		repo: `${config.homepage}`,
 		editLinks: false,
 		smoothScroll: true,
 		searchPlaceholder: "Search",
-		navbar: true,
-		nav: [
+		navbar: [
 			{
 				text: "Guide",
-				link: "/guide/Overview.md",
+				link: "/guide/overview.md",
 			},
 			{
 				text: "References",
@@ -25,20 +26,65 @@ export default defineConfig({
 		sidebarDepth: 3,
 		sidebar: [
 			{
-				title: "Guide",
-				children: ["/guide/Overview.md", "/guide/Usage.md"],
+				text: "Guide",
+				children: [
+					{
+						text: "Overview",
+						link: "/guide/overview.html",
+					},
+					{
+						text: "Usage",
+						link: "/guide/usage.html",
+					},
+				],
 			},
 			{
-				title: "References",
+				text: "References",
 				children: [
-					"/references/MessageCommandBuilder.md",
-					"/references/MessageCommandBuilderData.md",
-					"/references/MessageCommandOption.md",
-					"/references/MessageCommandOptionType.md",
-					"/references/MessageCommandStringOption.md",
-					"/references/MessageCommandNumberOption.md",
-					"/references/MessageCommandOptionChoice.md",
-					"/references/MessageCommandOptionChoiceable.md",
+					{
+						text: "MessageCommandBuilder",
+						link: "/references/MessageCommandBuilder.html",
+					},
+					{
+						text: "MessageCommandBuilderData",
+						link: "/references/MessageCommandBuilderData.html",
+					},
+					{
+						text: "MessageCommandOption",
+						link: "/references/MessageCommandOption.html",
+					},
+					{
+						text: "MessageCommandStringOption",
+						link: "/references/MessageCommandStringOption.html",
+					},
+					{
+						text: "MessageCommandNumberOption",
+						link: "/references/MessageCommandNumberOption.html",
+					},
+					{
+						text: "MessageCommandBooleanOption",
+						link: "/references/MessageCommandBooleanOption.html",
+					},
+					{
+						text: "MessageCommandMemberOption",
+						link: "/references/MessageCommandMemberOption.html",
+					},
+					{
+						text: "MessageCommandChannelOption",
+						link: "/references/MessageCommandChannelOption.html",
+					},
+					{
+						text: "MessageCommandRoleOption",
+						link: "/references/MessageCommandRoleOption.html",
+					},
+					{
+						text: "MessageCommandOptionChoice",
+						link: "/references/MessageCommandOptionChoice.html",
+					},
+					{
+						text: "MessageCommandOptionChoiceable",
+						link: "/references/MessageCommandOptionChoiceable.html",
+					},
 				],
 			},
 		],

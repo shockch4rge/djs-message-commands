@@ -1,20 +1,20 @@
 # MessageCommandBuilderData 
 <Badge type="tip" text="interface" vertical="middle" />
 
-### name: 
+### name
 - **type**: `string`
 
-### description:
+### description
 - **type**: `string`
 
-### aliases:
+### aliases
 - **type**: `string[]`
 
-### roles:
+### roles
 - **type**: `Snowflake[]`
 
-### permissions:
+### permissions
 - **type**: `PermissionResolvable[]`
 
-### options:
+### options
 - **type**: `MessageCommandOption[]`

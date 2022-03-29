@@ -1,4 +1,5 @@
-# MessageCommandBuilder 
+# MessageCommandBuilder
+
 <Badge type="tip" text="class" vertical="middle" />
 
 ## Properties
@@ -29,13 +30,13 @@ The aliases that this command identifies by.
 
 ### options
 
--   **type**: `MessageCommandOption[]`
+-   **type**: [MessageCommandOption](MessageCommandOption.md)[]
 
 The available options/arguments that can be supplied to by this command.
 
 ## Methods
 
-### **setName(name)**
+### **setName**
 
 #### Parameters:
 
@@ -43,13 +44,13 @@ The available options/arguments that can be supplied to by this command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 Sets the name of the command.
 
 ---
 
-### **setDescription(description)**
+### **setDescription**
 
 #### Parameters:
 
@@ -57,13 +58,13 @@ Sets the name of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 Sets the description of the command.
 
 ---
 
-### **setAliases(aliases)**
+### **setAliases**
 
 #### Parameters:
 
@@ -71,11 +72,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **setRoles(ids)**
+### **setRoles**
 
 #### Parameters:
 
@@ -83,21 +84,21 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **setPermissions(permissions)**
+### **setPermissions**
 
 -   **permissions**: `PermissionResolvable[]`
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addStringOption(composer)**
+### **addStringOption**
 
 #### Parameters:
 
@@ -105,11 +106,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addNumberOption(composer)**
+### **addNumberOption**
 
 #### Parameters:
 
@@ -117,11 +118,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addBooleanOption(composer)**
+### **addBooleanOption**
 
 #### Parameters:
 
@@ -129,11 +130,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addMemberOption(composer)**
+### **addMemberOption**
 
 #### Parameters:
 
@@ -141,11 +142,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addChannelOption(composer)**
+### **addChannelOption**
 
 #### Parameters:
 
@@ -153,11 +154,11 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
 
 ---
 
-### **addRoleOption(composer)**
+### **addRoleOption**
 
 #### Parameters:
 
@@ -165,4 +166,32 @@ Sets the description of the command.
 
 #### Returns:
 
--   `MessageCommandBuilder`
+-   [MessageCommandBuilder](MessageCommandBuilder.md)
+
+---
+
+### **toRegex**
+
+#### Parameters:
+
+-   **prefix**: `string`
+
+The guild's message prefix.
+
+#### Returns:
+
+-   `RegExp`
+
+---
+
+### **validate**
+
+#### Parameters:
+
+-   **message**: `Message`
+
+The message that invoked the command.
+
+#### Returns:
+
+-   `Object`
