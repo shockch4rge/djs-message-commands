@@ -63,22 +63,7 @@ This package aims to provide a safe and easy way to manage, create, and validate
 
 ## Quick Start
 
-How discord.js recommends structuring slash commands:
-
-```js
-// **/commands/slash/foo.js
-import { SlashCommandBuilder } from "@discordjs/builders";
-
-module.exports = {
-	builder: new SlashCommandBuilder().setName("foo").setDescription("bar"),
-
-	execute: async interaction => {
-		// some code here...
-	},
-};
-```
-
-This package follows a similar pattern.
+### Defining commands
 
 ```js
 // **/commands/message/foo.js
@@ -93,7 +78,7 @@ module.exports = {
 };
 ```
 
-### Receiving message commands
+### Receiving commands
 
 ```js
 // index.js

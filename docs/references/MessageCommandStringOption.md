@@ -2,7 +2,7 @@
 
 <Badge type="tip" text="class" vertical="middle" />
 
-#### extends [MessageCommandOption](./MessageCommandOption.md)
+#### extends [MessageCommandOptionChoiceable](./MessageCommandOptionChoiceable.md)
 
 ## Methods
 
@@ -15,3 +15,20 @@
 #### Returns
 
 -   `string`
+
+::: details TypeScript Source Code
+
+```ts:no-line-numbers
+public override validate(option: string): string | undefined {
+    for (const choice of this.choices) {
+        if (choice[1] === option) {
+            return choice[1];
+        }
+    }
+
+    const matches = option.matchAll(/^"(.+)"$/gi).next().value;
+    return matches ? matches[1] : undefined;
+}
+```
+
+:::

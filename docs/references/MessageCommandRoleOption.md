@@ -15,3 +15,14 @@
 #### Returns
 
 -   `Snowflake`
+
+::: details TypeScript Source Code
+
+```ts:no-line-numbers
+public override validate(option: string): Snowflake | undefined {
+    const matches = option.matchAll(MessageMentions.ROLES_PATTERN).next().value;
+    return matches ? matches[1] : undefined;
+}
+```
+
+:::

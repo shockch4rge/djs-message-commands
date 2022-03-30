@@ -4,8 +4,26 @@
 
 #### extends [MessageCommandOption](./MessageCommandOption.md)
 
+## Constructor
+
+-   **type**: [MessageCommandOptionType](./MessageCommandOptionType.md)
+
+::: details TypeScript Source Code
+
+```ts:no-line-numbers
+public constructor(type: MessageCommandOptionType) {
+    super(type);
+}
+```
+
+:::
+
+#### Type Parameters
+
+-   **T** extends `string | number`
+
 ## Properties
 
 ### **choices**
 
--   **type**: [MessageCommandOptionChoice](MessageCommandOptionChoice.md)[]
+-   **type**: [MessageCommandOptionChoice](MessageCommandOptionChoice.md)\<T>`[]`
