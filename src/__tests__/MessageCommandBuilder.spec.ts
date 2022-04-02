@@ -61,7 +61,9 @@ describe("MessageCommandBuilder constructing and testing", () => {
 			},
 		} as Message;
 
-		const { options } = builder.validate(mockMessage);
+		const [errors, options] = builder.validate(mockMessage);
+
+		expect(errors).toBeFalsy();
 
 		expect(builder.options.length).toBe(4);
 		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
@@ -103,21 +105,24 @@ describe("MessageCommandBuilder constructing and testing", () => {
 			guild: {
 				roles: {
 					cache: new Collection<string, Role>()
+						// @ts-ignore null as placeholder role
 						.set("not-supposed-to-have", null)
+						// @ts-ignore null as placeholder role
 						.set("supposed-to-have", null),
 				},
 			},
 			member: {
 				permissions: new Permissions("ADD_REACTIONS"),
 				roles: {
+					// @ts-ignore null as placeholder role
 					cache: new Collection<string, Role>().set("supposed-to-have", null),
 				},
 			},
 		} as Message;
 
-		const { errors, options } = builder.validate(message);
+		const [errors, options] = builder.validate(message);
 
-		expect(errors).toHaveLength(0);
+		expect(errors).toBeFalsy();
 
 		expect(options.length).toBe(5);
 		expect(options[0]).toBe("this");
