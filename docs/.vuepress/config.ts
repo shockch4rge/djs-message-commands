@@ -8,6 +8,10 @@ import type { DefaultThemeOptions } from "vuepress";
 export default defineUserConfig<DefaultThemeOptions>({
 	title: `${config.name} v${config.version}`,
 	description: `${config.description}`,
+
+	/** Site config */
+	base: "/djs-message-commands/",
+
 	themeConfig: {
 		repo: `${config.homepage}`,
 		editLinks: false,
@@ -36,6 +40,10 @@ export default defineUserConfig<DefaultThemeOptions>({
 						text: "Usage",
 						link: "/guide/usage.html",
 					},
+					{
+						text: "Tips",
+						link: "/guide/tips.html",
+					}
 				],
 			},
 			{
@@ -52,6 +60,10 @@ export default defineUserConfig<DefaultThemeOptions>({
 					{
 						text: "MessageCommandOption",
 						link: "/references/MessageCommandOption.html",
+					},
+					{
+						text: "MessageCommandOptionData",
+						link: "/references/MessageCommandOptionData.html",
 					},
 					{
 						text: "MessageCommandStringOption",

@@ -1,7 +1,7 @@
 ---
 home: true
 actions:
-  - text: "Get Started"
+  - text: "Read Documentation"
     link: "/guide/overview.md"
     type: "primary"
   - text: "NPM Registry"
@@ -10,9 +10,9 @@ actions:
 features:
   - title: Builder-based pattern
     details: Maintain parity with slash commands by employing a builder-based pattern, reminiscent of discord.js' implementation.
-  - title: Non-opinionated
-    details: No opinionated code, no opinionated configuration, allowing scalable customisation.
-  - title: Robust, easily-testable message commands
+  - title: Little Opinionation
+    details: Use a modular and scalable approach to message commands.
+  - title: Robust and easily-testable
     details: Create message commands without sacrificing most of the flexibility that slash commands provide.
 footer: MIT Licensed
 ---
