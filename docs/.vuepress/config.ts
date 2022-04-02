@@ -10,7 +10,7 @@ export default defineUserConfig<DefaultThemeOptions>({
 	description: `${config.description}`,
 
 	/** Site config */
-	base: "/djs-message-commands/",
+	base: `/${config.name}/`,
 
 	themeConfig: {
 		repo: `${config.homepage}`,
