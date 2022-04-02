@@ -27,8 +27,9 @@ While these problems have been widely acknowledged by the community, they are st
 This package aims to provide a safe and easy way to manage, create, and validate message commands, with an architecture reminiscent of discord.js' slash command builders.
 
 ## Notes
-- Required options are not supported as of now. They might come in a later release.
-- While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide as most of the code will be similar to theirs.
+
+-   Required options are not supported as of now. They might come in a later release.
+-   While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide as most of the code will be similar to theirs.
 
 ## Installation
 
@@ -52,7 +53,7 @@ How discord.js recommends structuring slash commands:
 
 ```js
 // **/commands/slash/foo.js
-import { SlashCommandBuilder } from "@discordjs/builders"
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 module.exports = {
 	builder: new SlashCommandBuilder().setName("foo").setDescription("bar"),
@@ -67,7 +68,7 @@ This package follows a similar pattern:
 
 ```js
 // **/commands/message/foo.js
-import { MessageCommandBuilder } from "djs-message-commands"
+import { MessageCommandBuilder } from "djs-message-commands";
 
 module.exports = {
 	builder: new MessageCommandBuilder().setName("foo").setDescription("bar"),
@@ -79,6 +80,7 @@ module.exports = {
 ```
 
 ### Receiving message commands:
+
 ```js
 // index.js
 
@@ -112,24 +114,22 @@ client.on("messageCreate", async message => {
 	if (!command) {
 		// handle command not found
 		return;
-	};
-
+	}
 
 	// get errors and parsed options
 	const { errors, options } = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
 
 	try {
 		await command.execute(client, message, options);
-	}
-	catch (err) {
+	} catch (err) {
 		// handle execution error...
 	}
-})
+});
 ```
 
 ### Handling options:
@@ -148,35 +148,15 @@ module.exports = {
 				.setName("string-option")
 				.setDescription("foo option description")
 		)
-		.addNumberOption(option =>
-			option
-				.setName("number-option")
-				.setDescription("foo option description")
-		)
-		.addBooleanOption(option =>
-			option
-				.setName("boolean-option")
-				.setDescription("foo option description")
-		)
-		.addMemberOption(option =>
-			option
-				.setName("member-option")
-				.setDescription("foo option description")
-		)
-		.addChannelOption(option =>
-			option
-				.setName("channel-option")
-				.setDescription("foo option description")
-		)
-		.addRoleOption(option =>
-			option
-				.setName("role-option")
-				.setDescription("foo option description")
-	),
+		.addNumberOption(option => option.setName("number-option").setDescription("foo option description"))
+		.addBooleanOption(option => option.setName("boolean-option").setDescription("foo option description"))
+		.addMemberOption(option => option.setName("member-option").setDescription("foo option description"))
+		.addChannelOption(option => option.setName("channel-option").setDescription("foo option description"))
+		.addRoleOption(option => option.setName("role-option").setDescription("foo option description")),
 
 	execute: async (client, message, options) => {
-		const [string, number, boolean, memberId, channelId, roleId] = options
-		
+		const [string, number, boolean, memberId, channelId, roleId] = options;
+
 		// any mentionable option (members/roles/channels) will return the target's ID.
 		// to get them, use fetch() or get().
 		const member = await client.users.fetch(memberId);
@@ -187,24 +167,33 @@ module.exports = {
 ```
 
 Usage with TypeScript:
+
 ```ts
 // **/commands/message/foo.ts
 import { MessageCommandBuilder } from "djs-message-commands";
 
 module.exports = {
 	builder: new MessageCommandBuilder(),
-		// same options defined above...
+	// same options defined above...
 
 	// the 'options' parameter will be an unknown array
 	execute: async (client, message, options) => {
 		// assert types in the order that you chained them in.
 		// e.g. if you did addStringOption() and then addBooleanOption(), the types order would be [string, boolean].
-		const [string, number, boolean, memberId, channelId, roleId] = options as [string, number, boolean, string, string, string];
+		const [string, number, boolean, memberId, channelId, roleId] = options as [
+			string,
+			number,
+			boolean,
+			string,
+			string,
+			string
+		];
 	},
 };
 ```
 
 The package exposes a utility method, `toRegex()`, in the builder class:
+
 ```js
 const builder = new MessageCommandBuilder()
 		.setName("test")

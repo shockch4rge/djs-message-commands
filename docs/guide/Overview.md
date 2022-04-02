@@ -155,9 +155,9 @@ client.on("messageCreate", async message => {
 	}
 
 	// get errors and parsed options
-	const { errors, options } = command.builder.validate(message);
+	const [errors, options] = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
