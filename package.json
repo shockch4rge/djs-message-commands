@@ -8,7 +8,7 @@
 		"build": "tsc ./src/*.ts",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs",
-		"docs:deploy": "npm run docs:build && npx gh-pages docs/.vuepress/dist",
+		"docs:deploy": "npm run docs:build && npx gh-pages -d docs/.vuepress/dist",
 		"test": "jest"
 	},
 	"files": [
