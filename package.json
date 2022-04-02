@@ -1,6 +1,6 @@
 {
 	"name": "djs-message-commands",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"description": "Build easy, safe, and testable message commands for discord.js",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
