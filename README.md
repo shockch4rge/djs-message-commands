@@ -60,6 +60,10 @@ This package aims to provide a safe and easy way to manage, create, and validate
 > -   Required options are not supported as of now. They might come in later release.
 > -   While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide for more in-depth details.
 
+## Documentation
+
+Learn more and read the full documentation [here!](https://shockch4rge.github.io/djs-message-commands/)
+
 ## Quick Start
 
 ### Importing
