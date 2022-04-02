@@ -7,6 +7,7 @@ import {
     MessageCommandNumberOption, MessageCommandOption, MessageCommandOptionChoiceable,
     MessageCommandOptionType, MessageCommandRoleOption, MessageCommandStringOption
 } from "./";
+import { MessageCommandOptionError } from "./MessageCommandOption";
 
 
 export interface MessageCommandBuilderData {
@@ -247,13 +248,18 @@ export class MessageCommandBuilder {
 	 * @returns The parsed options and potential errors.
 	 */
 	public validate(message: Message) {
-		const errors: string[] = [];
+		let errors: MessageCommandOptionError[] | undefined;
 		const parsedOptions: unknown[] = [];
 		const args = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
-				errors.push(`Missing permission: ${perm}`);
+				if (!errors) errors = [];
+
+				errors.push({
+					message: `Missing permission: ${perm}`,
+					type: "MISSING_PERMISSIONS",
+				});
 			}
 		}
 
@@ -263,7 +269,12 @@ export class MessageCommandBuilder {
 			}
 
 			if (!message.member!.roles.cache.has(id)) {
-				errors.push(`Missing role: ${roleMention(id)}`);
+				if (!errors) errors = [];
+
+				errors.push({
+					message: `Missing role: ${roleMention(id)}`,
+					type: "MISSING_ROLES",
+				});
 			}
 		}
 
@@ -273,19 +284,28 @@ export class MessageCommandBuilder {
 				const result = option.validate(args[i]);
 
 				if (result === undefined) {
-					errors.push(`Invalid option: ${option.name}`);
+					if (!errors) errors = [];
+
+					errors.push({
+						message: `Invalid option type: ${option.name} in ${this.name}`,
+						type: "INVALID_ARG_TYPE",
+					});
+
 					continue;
 				}
 
 				parsedOptions.push(result);
 			}
-		} else {
-			errors.push("The number of arguments provided does not match the number of parsedOptions.");
+		}
+		else {
+			if (!errors) errors = [];
+
+			errors.push({
+				message: `Missing arguments -> Expected: ${this.options.length}, Got: ${args.length}`,
+				type: "MISSING_ARGS",
+			});
 		}
 
-		return {
-			options: parsedOptions,
-			errors,
-		};
+		return [errors, parsedOptions] as const;
 	}
 }

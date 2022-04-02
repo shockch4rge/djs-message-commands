@@ -251,3 +251,15 @@ export const enum MessageCommandOptionType {
  * A tuple containing both the name and value for each option choice.
  */
 export type MessageCommandOptionChoice<ValueType extends string | number> = [name: string, value: ValueType];
+
+export interface MessageCommandOptionError {
+	message: string;
+	type: keyof typeof MessageCommandOptionErrors;
+}
+
+export const MessageCommandOptionErrors = {
+	INVALID_ARG_TYPE: "INVALID_ARG_TYPE",
+	MISSING_ARGS: "MISSING_ARGS",
+	MISSING_PERMISSIONS: "MISSING_PERMISSIONS",
+	MISSING_ROLES: "MISSING_ROLES",
+} as const;
