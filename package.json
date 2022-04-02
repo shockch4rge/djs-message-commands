@@ -5,7 +5,7 @@
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"scripts": {
-		"build": "tsc ./src/*.ts",
+		"build": "tsc",
 		"docs:dev": "vuepress dev docs",
 		"docs:build": "vuepress build docs",
 		"docs:deploy": "npm run docs:build && npx gh-pages -d docs/.vuepress/dist",
