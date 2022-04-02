@@ -1,84 +1,103 @@
-# djs-message-commands
+## Prerequisites
 
-A utility package to help you construct and validate message commands for [discord.js](https://discord.js.org/#/).
+-   Node v16.x or higher.
+-   Any package manager (npm, yarn, pnpm)
 
-## Features
+## Installation
 
--   Create robust and easily testable message commands
--   Uses a discord.js-esque builder system
--   Built-in parser to parse strings into numbers, booleans, mentionables, etc.
+With npm:
+
+```bash
+npm install djs-message-commands
+```
+
+With yarn:
+
+```bash
+yarn add djs-message-commands
+```
+
+With pnpm:
+
+```bash
+pnpm install djs-message-commands
+```
+
+With djs-message-commands comes a few features:
+
+-   **Command aliases**
+
+    Commands with long names can be given multiple aliases, reducing the user fatigue required to execute it and at the same time keeping full detail.
+
+-   **Roles and permissions checking**
+
+    Each command can be prerequisited by a list of roles and permissions before executing it, so that you can focus on a pure command implementation by separating adminstrative validation.
+
+-   **Options**
+
+    Similar to discord.js' SlashCommandOption, these are simply parameters of a message command. They are used to define the type of arguments that are expected to be passed in by the user.
+
+-   **Options (choices)**
+
+    For some option types, you can define a list of choices that the user can choose from.
 
 ## Background
 
 Ever since discord.js v13, slash commands have been far superior to message commands for both the developers and users.
 
-**Using classic message commands, it becomes hard to:**
+**Implementing a system for message commands is hard because:**
 
--   Parse commands into reliable, consistent formats
--   Handle _way_ too many edge cases (e.g. spacing between each argument, missing arguments, etc.)
--   Validate argument types (dear god)
--   Restrict specific arguments to pre-determined values (e.g. only allow specific strings, numbers etc.)
--   Create/manage commands in a scalable way
--   Handle permission/role descrepancies
+-   Commands need to be parsed into reliable, consistent formats, while handling _way_ too many edge cases (e.g. spacing between each argument, missing arguments, etc.)
+-   Restricting specific arguments to pre-determined values (e.g. only allow specific strings, numbers etc.) and validating argument types requires special implementation and complicated regular expressions.
+-   A scalable way to create commands had to be scrutinised over.
+-   Handle permission/role descrepancies. Checking administrative privileges was often mixed in with command execution.
 -   _and a lot more..._ you know what I'm talking about.
 
 While these problems have been widely acknowledged by the community, they are still a pain to deal with, as other packages don't quite hit the mark in terms of ease of use, e.g. consistency with discord.js, robustness etc.
 
 This package aims to provide a safe and easy way to manage, create, and validate message commands, with an architecture reminiscent of discord.js' slash command builders.
 
-## Notes
-- Required options are not supported as of now. They might come in a later release.
-- While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide as most of the code will be similar to theirs.
+> -   Required options are not supported as of now. They might come in later release.
+> -   While this package tries to be unopinionated, it still follows [discord.js' guide on managing file structure.](https://discordjs.guide/creating-your-bot/command-handling.html#individual-command-files) I recommend looking into this guide for more in-depth details.
 
-## Installation
+## Quick Start
 
-yarn:
+### Importing
 
-```
-yarn add djs-message-commands
-```
-
-npm:
-
-```
-npm install djs-message-commands
-```
-
-## Usage
-
-Read the in-depth documentation [here]! (WIP)
-
-How discord.js recommends structuring slash commands:
+JavaScript:
 
 ```js
-// **/commands/slash/foo.js
-import { SlashCommandBuilder } from "@discordjs/builders"
-
-module.exports = {
-	builder: new SlashCommandBuilder().setName("foo").setDescription("bar"),
-
-	execute: async interaction => {
-		// some code here...
-	},
-};
+const { MessageCommandBuilder } = require('djs-message-commands');
 ```
 
-This package follows a similar pattern:
+TypeScript:
+```ts
+// with "allowSyntheticDefaultImports": false
+// recommended way to import, even when set to true
+import { MessageCommandBuilder } from "djs-message-commands";
+
+// with "allowSyntheticDefaultImports": true
+import DMC from "djs-message-commands";
+    // or any other name you want
+```
+
+### Defining commands
 
 ```js
 // **/commands/message/foo.js
-import { MessageCommandBuilder } from "djs-message-commands"
+const { MessageCommandBuilder } = require("djs-message-commands");
 
 module.exports = {
 	builder: new MessageCommandBuilder().setName("foo").setDescription("bar"),
 
-	execute: async (message, options) => {
+	execute: async (client, message, options) => {
 		// some code here...
 	},
 };
 ```
 
-### Receiving message commands:
+### Receiving commands
+
 ```js
 // index.js
 
@@ -112,128 +131,62 @@ client.on("messageCreate", async message => {
 	if (!command) {
 		// handle command not found
 		return;
-	};
-
+	}
 
 	// get errors and parsed options
-	const { errors, options } = command.builder.validate(message);
+	const [errors, options] = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
 
 	try {
 		await command.execute(client, message, options);
-	}
-	catch (err) {
+	} catch (err) {
 		// handle execution error...
 	}
-})
+});
 ```
 
-### Handling options:
+### Handling options
 
 ```js
 // **/commands/message/foo.js
-import { MessageCommandBuilder } from "djs-message-commands";
+const { MessageCommandBuilder } = require("djs-message-commands");
 
 module.exports = {
 	builder: new MessageCommandBuilder()
-		.setName("foo")
-		.setDescription("bar")
+		.setName("send-dm")
+		.setDescription("Sends a DM to a member.")
 		.addStringOption(option =>
 			option
 				// you can name this however you want
-				.setName("string-option")
-				.setDescription("foo option description")
+				.setName("content")
+				.setDescription("The text to send.")
 		)
 		.addNumberOption(option =>
-			option
-				.setName("number-option")
-				.setDescription("foo option description")
+			option.setName("repeats").setDescription("How many times to repeat the message.")
 		)
-		.addBooleanOption(option =>
-			option
-				.setName("boolean-option")
-				.setDescription("foo option description")
-		)
-		.addMemberOption(option =>
-			option
-				.setName("member-option")
-				.setDescription("foo option description")
-		)
-		.addChannelOption(option =>
-			option
-				.setName("channel-option")
-				.setDescription("foo option description")
-		)
-		.addRoleOption(option =>
-			option
-				.setName("role-option")
-				.setDescription("foo option description")
-	),
+		.addMemberOption(option => option.setName("member").setDescription("The member to send the DM to.")),
 
 	execute: async (client, message, options) => {
-		const [string, number, boolean, memberId, channelId, roleId] = options
-		
-		// any mentionable option (members/roles/channels) will return the target's ID.
-		// to get them, use fetch() or get().
-		const member = await client.users.fetch(memberId);
-		// or
-		const member = await client.users.cache.get(memberId);
+		const [content, repeats, memberId] = options;
+
+		// any mentionable option extracts the Snowflake from the message
+		// to get the actual target, use fetch() or cache.get()
+		const member = await message.guild?.members.fetch(memberId);
+		// OR
+		const member = await message.guild?.members.cache.get(memberId);
+
+		if (member) {
+			for (let i = 0; i < repeats; i++) {
+				// send the message based on the number of repeats
+				await member.send(content);
+			}
+		}
 	},
 };
-```
-
-Usage with TypeScript:
-```ts
-// **/commands/message/foo.ts
-import { MessageCommandBuilder } from "djs-message-commands";
-
-module.exports = {
-	builder: new MessageCommandBuilder(),
-		// same options defined above...
-
-	// the 'options' parameter will be an unknown array
-	execute: async (client, message, options) => {
-		// assert types in the order that you chained them in.
-		// e.g. if you did addStringOption() and then addBooleanOption(), the types order would be [string, boolean].
-		const [string, number, boolean, memberId, channelId, roleId] = options as [string, number, boolean, string, string, string];
-	},
-};
-```
-
-The package exposes a utility method, `toRegex()`, in the builder class:
-```js
-const builder = new MessageCommandBuilder()
-		.setName("test")
-		.setDescription("testing description")
-		.setAliases(["t", "TEST"])
-		.addStringOption(option =>
-			option
-				.setName("string-option")
-				.setDescription("foo option description")
-		)
-		.addNumberOption(option =>
-			option
-				.setName("number-option")
-				.setDescription("foo option description")
-		)
-		.addBooleanOption(option =>
-			option
-				.setName("boolean-option")
-				.setDescription("foo option description")
-		)
-		.addMemberOption(option =>
-			option
-				.setName("member-option")
-				.setDescription("foo option description")
-		));
-
-
-console.log(builder.toRegex());
-// /^>>(test|t|TEST)\s+"(.+)"\s+(\d+)\s+(true|false)\s+<@!?(\d{17,19})>$/gm
 ```
 
 ## Contribution
