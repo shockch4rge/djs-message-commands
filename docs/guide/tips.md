@@ -143,9 +143,9 @@ function loadCommands() {
 </CodeGroupItem>
 </CodeGroup>
 
-## Regular expression implementation
+## Regular expressions
 
-The package exposes a utility method, [`toRegex()`](../references/MessageCommandBuilder.md#toregex), in the builder class:
+Message commands are powered by regular expressions, playing the main role in parsing argument types. If you need to work with the full regex of the command, the package exposes a utility method, [`toRegex()`](../references/MessageCommandBuilder.md#toregex), in the builder class:
 
 ```js
 const PREFIX = "!";
