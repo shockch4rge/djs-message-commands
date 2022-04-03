@@ -97,6 +97,14 @@ export default defineUserConfig<DefaultThemeOptions>({
 						text: "MessageCommandOptionChoiceable",
 						link: "/references/MessageCommandOptionChoiceable.html",
 					},
+					{
+						text: "MessageCommandOptionError",
+						link: "/references/MessageCommandOptionError.html",
+					},
+					{
+						text: "MessageCommandOptionErrors",
+						link: "/references/MessageCommandOptionErrors.html",
+					}
 				],
 			},
 		],

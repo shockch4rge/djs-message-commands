@@ -155,9 +155,9 @@ client.on("messageCreate", async message => {
 	}
 
 	// get errors and parsed options
-	const { errors, options } = command.builder.validate(message);
+	const [errors, options] = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
@@ -255,7 +255,7 @@ module.exports = {
 		// to get the actual target, use fetch() or cache.get()
 		const member = await message.guild?.members.fetch(memberId);
 		// OR
-		const member = await message.guild?.memebers.cache.get(memberId);
+		const member = await message.guild?.members.cache.get(memberId);
 
 		if (member) {
 			for (let i = 0; i < repeats; i++) {
