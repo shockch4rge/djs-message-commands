@@ -167,9 +167,9 @@ client.on("messageCreate", async message => {
 	}
 
 	// get errors and parsed options
-	const { errors, options } = command.builder.validate(message);
+	const [errors, options] = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
@@ -243,9 +243,9 @@ client.on("messageCreate", async message => {
 	}
 
 	// get errors and parsed options
-	const { errors, options } = command.builder.validate(message);
+	const [errors, options] = command.builder.validate(message);
 
-	if (errors.length > 0) {
+	if (errors) {
 		console.warn(errors);
 		return;
 	}
@@ -273,42 +273,39 @@ function loadCommands() {
 </CodeGroupItem>
 </CodeGroup>
 
-As you can see, most of the code is identical to SlashCommandBuilder. 
+As you can see, most of the code is identical to SlashCommandBuilder.
 
 Here's a more in-depth example of how you can build a message command:
 
 ```ts
-
 // Message command to set the nickname of a member.
 
 const command: MessageCommandData = {
 	builder: new MessageCommandBuilder()
-        .setName("set-nickname")
-        .setDescription("Set the nickname of someone else sneakily.")
+		.setName("set-nickname")
+		.setDescription("Set the nickname of someone else sneakily.")
 		// the command can be triggered with any of these aliases
-        .setAliases(["nick", "set-nick"])
-	  	/*
+		.setAliases(["nick", "set-nick"])
+		/*
 			add an option that only allows member mention types
 			allowed: <@!123456789012345123>
 			disallowed: 4, "randomstring", true
 			regex: /^<@!?\d{17,19}>$/
 	  	*/
-	  	.addMemberOption((option: MessageCommandMemberOption) =>
-		  	option
+		.addMemberOption((option: MessageCommandMemberOption) =>
+			option
 				.setName("member")
 				.setDescription("The member to set the nickname")
-		/*
+				/*
 			add an option that only allows string types
 			allowed: "foo", "CoolNickname-123"
 			disallowed: 4, true, <@!1234512345123>
 			regex: /^"(.+)"$/
 	   	*/
-	   	.addStringOption((option: MessageCommandStringOption) =>
-		   	option
-				.setName("nickname")
-				.setDescription("The nickname to set")
-	   	)
-	),
+				.addStringOption((option: MessageCommandStringOption) =>
+					option.setName("nickname").setDescription("The nickname to set")
+				)
+		),
 
 	execute: async (client, message, options) => {
 		/**
@@ -428,7 +425,6 @@ Note that once you set any choices, they are the only values the user can choose
 
 For example, we have a message command with a string option here:
 
-
 <CodeGroup>
 <CodeGroupItem title="JS">
 
@@ -438,11 +434,7 @@ module.exports = {
 		.setName("set-audio-quality")
 		.setDescription("Set the audio quality of...something.")
 		.setAliases(["saq", "set-aq"])
-		.addStringOption(option =>
-			option
-				.setName("quality")
-				.setDescription("The available quality options.")
-		),
+		.addStringOption(option => option.setName("quality").setDescription("The available quality options.")),
 
 	execute: async (client, message, options) => {
 		// ...
@@ -459,11 +451,7 @@ const command: MessageCommandData = {
 		.setName("set-audio-quality")
 		.setDescription("Set the audio quality of...something.")
 		.setAliases(["saq", "set-aq"])
-		.addStringOption(option =>
-			option
-				.setName("quality")
-				.setDescription("The available quality options.")
-		),
+		.addStringOption(option => option.setName("quality").setDescription("The available quality options.")),
 
 	execute: async (client, message, options) => {
 		// ...
@@ -486,7 +474,7 @@ const AudioQuality = {
 	Low: "low",
 	Medium: "medium",
 	High: "high",
-}
+};
 
 module.exports = {
 	builder: new MessageCommandBuilder()
@@ -498,8 +486,8 @@ module.exports = {
 				.setName("quality")
 				.setDescription("The available audio quality choices.")
 				/**
-				 *	for each tuple, the first element is 
-				 *  the choice name (displayed to user), 
+				 *	for each tuple, the first element is
+				 *  the choice name (displayed to user),
 				 * 	and the second is the value (value at runtime).
 				 */
 				.setChoices([
@@ -536,8 +524,8 @@ const command: MessageCommandData = {
 				.setName("quality")
 				.setDescription("The available audio quality choices.")
 				/**
-				 *	for each tuple, the first element is 
-				 *  the choice name (displayed to user), 
+				 *	for each tuple, the first element is
+				 *  the choice name (displayed to user),
 				 * 	and the second is the value (value at runtime).
 				 */
 				.setChoices([
@@ -545,7 +533,7 @@ const command: MessageCommandData = {
 					["Medium", AudioQuality.Medium],
 					["High", AudioQuality.High],
 				])
-	),
+		),
 
 	execute: async (client, message, options) => {
 		// input can only exist as "Low", "Medium", or "High"
@@ -571,35 +559,37 @@ A message command sent by the user should look something like this:
 
 Let's dissect the command by splitting the arguments by whitespaces:
 
-1. First, we have `!test`. This is what triggers the command.
+1. First, we have `!test`. This is what triggers the command. Note that if the command has aliases like `t`, it can also be activated by `!t`.
 2. `"this is a string"` is the first **string** argument. Note the double quotes surrounding it! String options are denoted by this format.
 3. `32` is a **number** argument.
-4. `true` is a boolean argument. This can be either `true` or `false`. Values like `1`, `0`, `on` & `off` are invalid.
-5. `@Adobe Xd` is a member mention.
-6. `@bot` is a role mention.
-7. `#bot-testing` is a channel mention.
+4. `true` is a **boolean** argument. This can be either `true` or `false`. Values like `1`, `0`, `on` & `off` are invalid.
+5. `@Adobe Xd` is a **member** mention argument. Its real structure is `<@!{memberId}>`.
+6. `@bot` is a **role** mention argument. Its real structure is `<@&{roleId}>`
+7. `#bot-testing` is a **channel** mention argument. Its real structure is `<#{channelId}>`.
 
-The central flow of this package lies in [MessageCommandBuilder](../references/MessageCommandBuilder.md)'s [`validate()`](../references/MessageCommandBuilder.md#validate) method. Here, it checks:
+**The central flow of this package lies in [MessageCommandBuilder](../references/MessageCommandBuilder.md)'s [`validate()`](../references/MessageCommandBuilder.md#validate) method**. 
 
-- If the member has the required permissions and roles
-- The type of argument passed into each option slot, including choices
-- The number of arguments
+Here, it checks:
 
-You may check out the source code here, but in short, it returns an object containing:
+-   If the member has the required permissions and roles
+-   The type of argument passed into each option slot, including choices
+-   The number of arguments and whether there are too many or too few
 
-- An array of error messages
-- An 'options' array.
+You may check out the source code in the link, but in short, it returns a tuple containing:
 
-To get any returned errors, check if the length of the errors array is more than 0:
+-   A potential array of error messages
+-   An 'options' array.
+
+To get any returned errors, check if the errors array is defined:
 
 <CodeGroup>
 <CodeGroupItem title="JS">
 
 ```js
-const { errors, options } = command.builder.validate(message);
+const [errors, options] = command.builder.validate(message);
 
-if (errors.length > 0) {
-	console.log(errors);
+if (errors) {
+	// ...
 }
 ```
 
@@ -607,10 +597,10 @@ if (errors.length > 0) {
 <CodeGroupItem title="TS">
 
 ```ts
-const { errors, options } = command.builder.validate(message);
+const [errors, options] = command.builder.validate(message);
 
-if (errors.length > 0) {
-	console.log(errors);
+if (errors) {
+	// ...
 }
 ```
 
