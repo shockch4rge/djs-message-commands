@@ -2,7 +2,15 @@
 
 ## [Unreleased]
 
-## 1.0.3 - 2022-04-02
+## 1.2.0 - 2020-04-03
+
+## Changed
+
+-   Updated documentation with error rework changes
+-   Updated formatting in documentation
+-   Fixed typo in documentation 'Overview' section
+
+## 1.1.0 - 2022-04-02
 
 ### Added
 
