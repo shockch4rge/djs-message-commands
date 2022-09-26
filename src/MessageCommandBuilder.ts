@@ -9,7 +9,6 @@ import {
 } from "./";
 import { MessageCommandOptionError } from "./MessageCommandOption";
 
-
 export interface MessageCommandBuilderData {
 	name: string;
 	description: string;
@@ -60,7 +59,7 @@ export class MessageCommandBuilder {
 	 * @returns The builder instance.
 	 */
 	public setName(name: string) {
-		if (name === "") {
+		if (!name) {
 			throw new Error("Command name must be at least one character long.");
 		}
 
@@ -74,7 +73,7 @@ export class MessageCommandBuilder {
 	 * @returns The builder instance.
 	 */
 	public setDescription(description: string) {
-		if (description === "") {
+		if (!description) {
 			throw new Error("Command description must be at least one character long.");
 		}
 
@@ -88,7 +87,7 @@ export class MessageCommandBuilder {
 	 * @returns The builder instance.
 	 */
 	public setAliases(aliases: string[]) {
-		if (aliases.length <= 0) {
+		if (!aliases.length) {
 			throw new Error("There must be at least one alias provided in the array.");
 		}
 
@@ -106,7 +105,7 @@ export class MessageCommandBuilder {
 	 * @returns The builder instance.
 	 */
 	public setRoles(ids: string[]) {
-		if (ids.length <= 0) {
+		if (!ids.length) {
 			throw new Error("There must be at least one role ID provided in the array.");
 		}
 
@@ -120,7 +119,7 @@ export class MessageCommandBuilder {
 	 * @returns The builder instance.
 	 */
 	public setPermissions(permissions: PermissionResolvable[]) {
-		if (permissions.length <= 0) {
+		if (!permissions.length) {
 			throw new Error("There must be at least one permission provided in the array.");
 		}
 
@@ -210,10 +209,10 @@ export class MessageCommandBuilder {
 			if (option instanceof MessageCommandOptionChoiceable) {
 				if (option.choices.length <= 0) {
 					switch (option.type) {
-						case MessageCommandOptionType.STRING:
+						case MessageCommandOptionType.String:
 							regex += `\"(.+)\"`;
 							break;
-						case MessageCommandOptionType.NUMBER:
+						case MessageCommandOptionType.Number:
 							regex += `(\\d+)`;
 							break;
 					}
@@ -225,16 +224,16 @@ export class MessageCommandBuilder {
 			}
 
 			switch (option.type) {
-				case MessageCommandOptionType.BOOLEAN:
+				case MessageCommandOptionType.Boolean:
 					regex += `(true|false)`;
 					break;
-				case MessageCommandOptionType.MEMBER:
+				case MessageCommandOptionType.Member:
 					regex += `<@!?(\\d{17,19})>`;
 					break;
-				case MessageCommandOptionType.CHANNEL:
+				case MessageCommandOptionType.Channel:
 					regex += `<#(\\d{17,19})>`;
 					break;
-				case MessageCommandOptionType.ROLE:
+				case MessageCommandOptionType.Role:
 					regex += `<@&(\\d{17,19})>`;
 			}
 		}
@@ -248,17 +247,17 @@ export class MessageCommandBuilder {
 	 * @returns The parsed options and potential errors.
 	 */
 	public validate(message: Message) {
-		let errors: MessageCommandOptionError[] | undefined;
+		let errors: MessageCommandOptionError[] | null = null;
 		const parsedOptions: unknown[] = [];
 		const args = message.content.trim().split(/\s+/).slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
-				if (!errors) errors = [];
+				errors ??= [];
 
 				errors.push({
 					message: `Missing permission: ${perm}`,
-					type: "MISSING_PERMISSIONS",
+					type: "MissingPermissions",
 				});
 			}
 		}
@@ -269,11 +268,11 @@ export class MessageCommandBuilder {
 			}
 
 			if (!message.member!.roles.cache.has(id)) {
-				if (!errors) errors = [];
+				errors ??= [];
 
 				errors.push({
 					message: `Missing role: ${roleMention(id)}`,
-					type: "MISSING_ROLES",
+					type: "MissionRoles",
 				});
 			}
 		}
@@ -284,11 +283,11 @@ export class MessageCommandBuilder {
 				const result = option.validate(args[i]);
 
 				if (result === undefined) {
-					if (!errors) errors = [];
+					errors ??= [];
 
 					errors.push({
 						message: `Invalid option type: ${option.name} in ${this.name}`,
-						type: "INVALID_ARG_TYPE",
+						type: "InvalidArgType",
 					});
 
 					continue;
@@ -298,11 +297,11 @@ export class MessageCommandBuilder {
 			}
 		}
 		else {
-			if (!errors) errors = [];
+			errors ??= [];
 
 			errors.push({
 				message: `Missing arguments -> Expected: ${this.options.length}, Got: ${args.length}`,
-				type: "MISSING_ARGS",
+				type: "MissingArgs",
 			});
 		}
 
