@@ -4,7 +4,7 @@ export interface MessageCommandOptionData {
 	name: string;
 	description: string;
 	readonly type: MessageCommandOptionType;
-	readonly regexString: string;
+	readonly regex: RegExp;
 }
 
 /**
@@ -25,13 +25,16 @@ export abstract class MessageCommandOption {
 	 */
 	public readonly type: MessageCommandOptionType;
 
-	public readonly regexString: string;
+	/**
+	 * The default regex literal of the option.
+	 */
+	public readonly regex: RegExp;
 
-	public constructor(data: Pick<MessageCommandOptionData, "type" | "regexString">) {
+	public constructor(data: Pick<MessageCommandOptionData, "type" | "regex">) {
 		this.name = "No name implemented";
 		this.description = "No description implemented";
 		this.type = data.type;
-		this.regexString = data.regexString;
+		this.regex = data.regex;
 	}
 
 	/**
@@ -85,17 +88,17 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 */
 	public choices: MessageCommandOptionChoice<T>[];
 
-	public constructor(type: Pick<MessageCommandOptionData, "type" | "regexString">) {
+	public constructor(type: Pick<MessageCommandOptionData, "type" | "regex">) {
 		super(type);
 		this.choices = [];
 	}
 
 	public buildRegexString() {
 		if (this.choices.length) {
-			return `\"(${this.choices.map(c => c[1]).join("|")})\"`
+			return new RegExp(`"(${this.choices.map(c => c[1]).join("|")})"`).source;
 		}
 
-		return this.regexString;
+		return this.regex.source;
 	}
 
 	/**
@@ -145,7 +148,7 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.String,
-			regexString: `\"(.+)\"`
+			regex: /"(.+)"/,
 		});
 	}
 
@@ -169,7 +172,7 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Number,
-			regexString: `(\\d+)`
+			regex: /(\d+)/
 		});
 	}
 
@@ -187,12 +190,12 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Boolean,
-			regexString: `(true|false)`,
+			regex: /(true|false)/,
 		});
 	}
 
 	public buildRegexString() {
-		return this.regexString;
+		return this.regex.source;
 	}
 
 	public override validate(option: string): boolean | undefined {
@@ -219,16 +222,16 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Member,
-			regexString: `<@!?(\\d{17,19})>`
+			regex: /<@!?(\d{17,19})>/
 		});
 	}
 
 	public buildRegexString() {
-		return this.regexString;
+		return this.regex.source;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(MessageMentions.UsersPattern).next().value;
+		const matches = option.matchAll(new RegExp(MessageMentions.UsersPattern, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -241,16 +244,16 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Channel,
-			regexString: `<#(\\d{17,19})>`,
+			regex: /<#(\d{17,19})>/,
 		});
 	}
 
 	public buildRegexString() {
-		return this.regexString;
+		return this.regex.source;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(MessageMentions.ChannelsPattern).next().value;
+		const matches = option.matchAll(new RegExp(MessageMentions.ChannelsPattern, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -263,16 +266,16 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Role,
-			regexString: `<@&(\\d{17,19})>`,
+			regex: /<@&(\d{17,19})>/,
 		});
 	}
-	
+
 	public buildRegexString() {
-		return this.regexString;
+		return this.regex.source;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(MessageMentions.RolesPattern).next().value;
+		const matches = option.matchAll(new RegExp(MessageMentions.RolesPattern, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -281,12 +284,13 @@ export class MessageCommandRoleOption extends MessageCommandOption {
  * An enum containing user-friendly values for each option type.
  */
 export enum MessageCommandOptionType {
-	Boolean = "Boolean",
-	Number = "Number",
-	String = "String",
-	Member = "Member",
-	Channel = "Channel",
-	Role = "Role",
+	Boolean = "true/false",
+	Number = "number",
+	String = "text",
+	Member = "member",
+	Channel = "channel",
+	Role = "role",
+	Mentionable = "mention",
 }
 
 /**
