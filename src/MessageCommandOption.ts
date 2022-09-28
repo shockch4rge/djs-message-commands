@@ -4,6 +4,7 @@ export interface MessageCommandOptionData {
 	name: string;
 	description: string;
 	readonly type: MessageCommandOptionType;
+	readonly regexString: string;
 }
 
 /**
@@ -24,11 +25,19 @@ export abstract class MessageCommandOption {
 	 */
 	public readonly type: MessageCommandOptionType;
 
-	public constructor(data: MessageCommandOptionType | MessageCommandOptionData) {
-		this.name = typeof data === "object" ? data.name : "No name implemented";
-		this.description = typeof data === "object" ? data.description : "No description implemented";
-		this.type = typeof data === "object" ? data.type : data;
+	public readonly regexString: string;
+
+	public constructor(data: Pick<MessageCommandOptionData, "type" | "regexString">) {
+		this.name = "No name implemented";
+		this.description = "No description implemented";
+		this.type = data.type;
+		this.regexString = data.regexString;
 	}
+
+	/**
+	 * Builds the option in regex form.
+	 */
+	public abstract buildRegexString(): string;
 
 	/**
 	 * Sets the name of the option. Cannot be empty.
@@ -76,9 +85,17 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 */
 	public choices: MessageCommandOptionChoice<T>[];
 
-	public constructor(type: MessageCommandOptionType) {
+	public constructor(type: Pick<MessageCommandOptionData, "type" | "regexString">) {
 		super(type);
 		this.choices = [];
+	}
+
+	public buildRegexString() {
+		if (this.choices.length) {
+			return `\"(${this.choices.map(c => c[1]).join("|")})\"`
+		}
+
+		return this.regexString;
 	}
 
 	/**
@@ -87,19 +104,19 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 * @returns The option instance.
 	 */
 	public addChoice(...choice: MessageCommandOptionChoice<T>) {
-		if (choice.length <= 0) {
+		if (!choice.length) {
 			throw new Error("There must be at least one choice provided in the array.");
 		}
 
-		if (choice.every(c => c === "")) {
+		if (choice.every(c => !c)) {
 			throw new Error("You must provide a name and value for the option choice.");
 		}
 
-		if (choice[0] === "") {
+		if (!choice[0]) {
 			throw new Error("You must provide a name for the option choice.");
 		}
 
-		if (choice[1] === "") {
+		if (!choice[1]) {
 			throw new Error("You must provide a value for the option choice.");
 		}
 
@@ -113,12 +130,12 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 * @returns	The option instance.
 	 */
 	public setChoices(choices: MessageCommandOptionChoice<T>[]) {
-		if (choices.length <= 0) {
+		if (!choices.length) {
 			throw new Error("You must provide at least one choice.");
 		}
 
 		for (const choice of choices) {
-			if (choice.some(c => c === "")) {
+			if (choice.some(c => !c)) {
 				throw new Error("You must provide a name and value for every option choice.");
 			}
 		}
@@ -134,7 +151,10 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
  */
 export class MessageCommandStringOption extends MessageCommandOptionChoiceable<string> {
 	public constructor() {
-		super(MessageCommandOptionType.String);
+		super({
+			type: MessageCommandOptionType.String,
+			regexString: `\"(.+)\"`
+		});
 	}
 
 	public override validate(option: string): string | undefined {
@@ -155,7 +175,10 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
  */
 export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<number> {
 	public constructor() {
-		super(MessageCommandOptionType.Number);
+		super({
+			type: MessageCommandOptionType.Number,
+			regexString: `(\\d+)`
+		});
 	}
 
 	public override validate(option: string) {
@@ -170,7 +193,14 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
  */
 export class MessageCommandBooleanOption extends MessageCommandOption {
 	public constructor() {
-		super(MessageCommandOptionType.Boolean);
+		super({
+			type: MessageCommandOptionType.Boolean,
+			regexString: `(true|false)`,
+		});
+	}
+
+	public buildRegexString() {
+		return this.regexString;
 	}
 
 	public override validate(option: string): boolean | undefined {
@@ -195,7 +225,14 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
  */
 export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
-		super(MessageCommandOptionType.Member);
+		super({
+			type: MessageCommandOptionType.Member,
+			regexString: `<@!?(\\d{17,19})>`
+		});
+	}
+
+	public buildRegexString() {
+		return this.regexString;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
@@ -210,7 +247,14 @@ export class MessageCommandMemberOption extends MessageCommandOption {
  */
 export class MessageCommandChannelOption extends MessageCommandOption {
 	public constructor() {
-		super(MessageCommandOptionType.Channel);
+		super({
+			type: MessageCommandOptionType.Channel,
+			regexString: `<#(\\d{17,19})>`,
+		});
+	}
+
+	public buildRegexString() {
+		return this.regexString;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
@@ -225,7 +269,14 @@ export class MessageCommandChannelOption extends MessageCommandOption {
  */
 export class MessageCommandRoleOption extends MessageCommandOption {
 	public constructor() {
-		super(MessageCommandOptionType.Role);
+		super({
+			type: MessageCommandOptionType.Role,
+			regexString: `<@&(\\d{17,19})>`,
+		});
+	}
+	
+	public buildRegexString() {
+		return this.regexString;
 	}
 
 	public override validate(option: string): Snowflake | undefined {
@@ -238,12 +289,12 @@ export class MessageCommandRoleOption extends MessageCommandOption {
  * An enum containing user-friendly values for each option type.
  */
 export enum MessageCommandOptionType {
-	Boolean = "true/false",
-	Number = "number",
-	String = "text",
-	Member = "member",
-	Channel = "channel",
-	Role = "role",
+	Boolean = "Boolean",
+	Number = "Number",
+	String = "String",
+	Member = "Member",
+	Channel = "Channel",
+	Role = "Role",
 }
 
 /**

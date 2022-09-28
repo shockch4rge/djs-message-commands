@@ -91,7 +91,7 @@ export class MessageCommandBuilder {
 			throw new Error("There must be at least one alias provided in the array.");
 		}
 
-		if (aliases.some(a => a === "")) {
+		if (aliases.some(a => !a)) {
 			throw new Error("Aliases must be at least one character long.");
 		}
 
@@ -198,44 +198,14 @@ export class MessageCommandBuilder {
 	 * @param prefix The guild's message prefix.
 	 * @returns The command's builder converted to RegExp.
 	 */
-	public toRegex(prefix: string): RegExp {
-		const aliases = this.aliases.length > 0 ? `|${this.aliases.join("|")}` : "";
+	public toRegex(prefix: string) {
+		const aliases = this.aliases.length ? `|${this.aliases.join("|")}` : "";
 
 		let regex = `${prefix}(${this.name}${aliases})`;
 
 		for (const option of this.options) {
 			regex += `\\s+`;
-
-			if (option instanceof MessageCommandOptionChoiceable) {
-				if (option.choices.length <= 0) {
-					switch (option.type) {
-						case MessageCommandOptionType.String:
-							regex += `\"(.+)\"`;
-							break;
-						case MessageCommandOptionType.Number:
-							regex += `(\\d+)`;
-							break;
-					}
-				} else {
-					regex += `\"(${option.choices.map(c => c[1]).join("|")})\"`;
-				}
-
-				continue;
-			}
-
-			switch (option.type) {
-				case MessageCommandOptionType.Boolean:
-					regex += `(true|false)`;
-					break;
-				case MessageCommandOptionType.Member:
-					regex += `<@!?(\\d{17,19})>`;
-					break;
-				case MessageCommandOptionType.Channel:
-					regex += `<#(\\d{17,19})>`;
-					break;
-				case MessageCommandOptionType.Role:
-					regex += `<@&(\\d{17,19})>`;
-			}
+			regex += option.buildRegexString();
 		}
 
 		return new RegExp(`^${regex}$`, "gm");
@@ -277,32 +247,33 @@ export class MessageCommandBuilder {
 			}
 		}
 
-		if (args.length === this.options.length) {
-			for (let i = 0; i < this.options.length; i++) {
-				const option = this.options[i];
-				const result = option.validate(args[i]);
-
-				if (result === undefined) {
-					errors ??= [];
-
-					errors.push({
-						message: `Invalid option type: ${option.name} in ${this.name}`,
-						type: "InvalidArgType",
-					});
-
-					continue;
-				}
-
-				parsedOptions.push(result);
-			}
-		}
-		else {
+		if (args.length !== this.options.length) {
 			errors ??= [];
 
 			errors.push({
 				message: `Missing arguments -> Expected: ${this.options.length}, Got: ${args.length}`,
 				type: "MissingArgs",
 			});
+
+			return [errors, parsedOptions] as const;
+		}
+
+		for (let i = 0; i < this.options.length; i++) {
+			const option = this.options[i];
+			const result = option.validate(args[i]);
+
+			if (result === undefined) {
+				errors ??= [];
+
+				errors.push({
+					message: `Invalid option type: ${option.name} in ${this.name}`,
+					type: "InvalidArgType",
+				});
+
+				continue;
+			}
+
+			parsedOptions.push(result);
 		}
 
 		return [errors, parsedOptions] as const;
