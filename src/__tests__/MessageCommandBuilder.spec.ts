@@ -1,7 +1,6 @@
-import { Collection, Message, Permissions, Role } from "discord.js";
+import { Collection, Message, PermissionFlagsBits, Permissions, Role } from "discord.js";
 
 import { MessageCommandBuilder, MessageCommandOptionType } from "../";
-
 
 const PREFIX = ">>";
 
@@ -57,19 +56,19 @@ describe("MessageCommandBuilder constructing and testing", () => {
 				roles: {
 					cache: new Collection<string, Role>(),
 				},
-				permissions: new Permissions(),
+				permissions: PermissionFlagsBits.Administrator,
 			},
-		} as Message;
+		} as unknown as Message;
 
 		const [errors, options] = builder.validate(mockMessage);
 
 		expect(errors).toBeFalsy();
 
 		expect(builder.options.length).toBe(4);
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
-		expect(builder.options[1].type).toBe(MessageCommandOptionType.NUMBER);
-		expect(builder.options[2].type).toBe(MessageCommandOptionType.BOOLEAN);
-		expect(builder.options[3].type).toBe(MessageCommandOptionType.MEMBER);
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
+		expect(builder.options[1].type).toBe(MessageCommandOptionType.Number);
+		expect(builder.options[2].type).toBe(MessageCommandOptionType.Boolean);
+		expect(builder.options[3].type).toBe(MessageCommandOptionType.Member);
 
 		expect(options.length).toBe(4);
 		expect(options[0]).toBe("string");
@@ -82,7 +81,7 @@ describe("MessageCommandBuilder constructing and testing", () => {
 		const builder = new MessageCommandBuilder();
 		builder.setName("test");
 		builder.setDescription("test description");
-		builder.setPermissions(["ADD_REACTIONS"]);
+		builder.setPermissions(["AddReactions"]);
 		builder.setRoles(["1234567890"]);
 		builder.addStringOption(option =>
 			option.setName("test-string-option-name").setDescription("test string option description")
@@ -112,13 +111,13 @@ describe("MessageCommandBuilder constructing and testing", () => {
 				},
 			},
 			member: {
-				permissions: new Permissions("ADD_REACTIONS"),
+				permissions: PermissionFlagsBits.AddReactions,
 				roles: {
 					// @ts-ignore null as placeholder role
 					cache: new Collection<string, Role>().set("supposed-to-have", null),
 				},
 			},
-		} as Message;
+		} as unknown as Message;
 
 		const [errors, options] = builder.validate(message);
 

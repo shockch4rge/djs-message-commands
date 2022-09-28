@@ -1,6 +1,5 @@
 import { MessageCommandBuilder, MessageCommandOptionType, MessageCommandStringOption } from "../";
 
-
 const PREFIX = ">>";
 
 describe("MessageCommandOption constructing and testing", () => {
@@ -45,7 +44,7 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(builder.options.length).toBe(1);
 		expect(builder.options[0].name).toBe("test-option-name");
 		expect(builder.options[0].description).toBe("test option description");
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
 		expect(regex).toEqual(/^>>(test-name)\s+"(.+)"$/gm);
 		expect(regex.test(mockMessage)).toBe(true);
 	});
@@ -71,7 +70,7 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(builder.options.length).toBe(1);
 		expect(builder.options[0].name).toBe("test-option-name");
 		expect(builder.options[0].description).toBe("test option description");
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
 		expect(builder.toRegex(PREFIX)).toEqual(expectedRegex);
 
 		mockMessages.forEach(msg => expect(!!msg.match(regex)).toBe(true));
@@ -114,19 +113,19 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(builder.options.length).toBe(5);
 		expect(builder.options[0].name).toBe("test-option-name");
 		expect(builder.options[0].description).toBe("test option description");
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
 		expect(builder.options[1].name).toBe("test-number-option-name");
 		expect(builder.options[1].description).toBe("test number option description");
-		expect(builder.options[1].type).toBe(MessageCommandOptionType.NUMBER);
+		expect(builder.options[1].type).toBe(MessageCommandOptionType.Number);
 		expect(builder.options[2].name).toBe("test-boolean-option-name");
 		expect(builder.options[2].description).toBe("test boolean option description");
-		expect(builder.options[2].type).toBe(MessageCommandOptionType.BOOLEAN);
+		expect(builder.options[2].type).toBe(MessageCommandOptionType.Boolean);
 		expect(builder.options[3].name).toBe("test-mentionable-option-name");
 		expect(builder.options[3].description).toBe("test mentionable option description");
-		expect(builder.options[3].type).toBe(MessageCommandOptionType.MEMBER);
+		expect(builder.options[3].type).toBe(MessageCommandOptionType.Member);
 		expect(builder.options[4].name).toBe("test-channel-option-name");
 		expect(builder.options[4].description).toBe("test channel option description");
-		expect(builder.options[4].type).toBe(MessageCommandOptionType.CHANNEL);
+		expect(builder.options[4].type).toBe(MessageCommandOptionType.Channel);
 		expect(actualRegex).toEqual(expectedRegex);
 		expect(actualRegex.test(mockMessage)).toBe(true);
 	});
@@ -154,7 +153,7 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(builder.options.length).toBe(1);
 		expect(builder.options[0].name).toBe("test-option-name");
 		expect(builder.options[0].description).toBe("test option description");
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.STRING);
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
 		expect(builder.toRegex(PREFIX)).toEqual(expectedRegex);
 	});
 });
