@@ -45,7 +45,7 @@ export abstract class MessageCommandOption {
 	 * @returns The option instance.
 	 */
 	public setName(name: string) {
-		if (name === "") {
+		if (!name) {
 			throw new Error("Option name must be at least one character long.");
 		}
 
@@ -59,7 +59,7 @@ export abstract class MessageCommandOption {
 	 * @returns The option instance.
 	 */
 	public setDescription(description: string) {
-		if (description === "") {
+		if (!description) {
 			throw new Error("Option description must be at least one character long.");
 		}
 
@@ -108,16 +108,8 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 			throw new Error("There must be at least one choice provided in the array.");
 		}
 
-		if (choice.every(c => !c)) {
+		if (choice.some(c => !c)) {
 			throw new Error("You must provide a name and value for the option choice.");
-		}
-
-		if (!choice[0]) {
-			throw new Error("You must provide a name for the option choice.");
-		}
-
-		if (!choice[1]) {
-			throw new Error("You must provide a value for the option choice.");
 		}
 
 		this.choices.push(choice);
