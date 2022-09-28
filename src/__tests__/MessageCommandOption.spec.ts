@@ -14,10 +14,10 @@ describe("MessageCommandOption constructing and testing", () => {
 			"You must provide a name and value for the option choice."
 		);
 		expect(() => option.addChoice("", "not-omitted")).toThrow(
-			"You must provide a name for the option choice."
+			"You must provide a name and value for the option choice."
 		);
 		expect(() => option.addChoice("not-omitted", "")).toThrow(
-			"You must provide a value for the option choice."
+			"You must provide a name and value for the option choice."
 		);
 		expect(() =>
 			option.setChoices([
