@@ -1,4 +1,4 @@
-import { Collection, Message, PermissionFlagsBits, Permissions, Role } from "discord.js";
+import { Collection, Message, PermissionsBitField, Role } from "discord.js";
 
 import { MessageCommandBuilder, MessageCommandOptionType } from "../";
 
@@ -56,9 +56,9 @@ describe("MessageCommandBuilder constructing and testing", () => {
 				roles: {
 					cache: new Collection<string, Role>(),
 				},
-				permissions: PermissionFlagsBits.Administrator,
+				permissions: new PermissionsBitField(),
 			},
-		} as unknown as Message;
+		} as Message;
 
 		const [errors, options] = builder.validate(mockMessage);
 
@@ -111,13 +111,13 @@ describe("MessageCommandBuilder constructing and testing", () => {
 				},
 			},
 			member: {
-				permissions: PermissionFlagsBits.AddReactions,
+				permissions: new PermissionsBitField("AddReactions"),
 				roles: {
 					// @ts-ignore null as placeholder role
 					cache: new Collection<string, Role>().set("supposed-to-have", null),
 				},
 			},
-		} as unknown as Message;
+		} as Message;
 
 		const [errors, options] = builder.validate(message);
 
