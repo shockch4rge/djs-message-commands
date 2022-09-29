@@ -222,7 +222,7 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Member,
-			regex: /<@!?(\d{17,19})>/
+			regex: /<@!?(\d{17,19})>/,
 		});
 	}
 
@@ -253,7 +253,7 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 	}
 
 	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(new RegExp(MessageMentions.ChannelsPattern, "g")).next().value;
+		const matches = option.matchAll(new RegExp(this.regex, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -275,7 +275,29 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 	}
 
 	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(new RegExp(MessageMentions.RolesPattern, "g")).next().value;
+		const matches = option.matchAll(new RegExp(this.regex, "g")).next().value;
+		return matches ? matches[1] : undefined;
+	}
+}
+
+/**
+ * A mentionable option.
+ * @extends MessageCommandOption
+ */
+export class MessageCommandMentionableOption extends MessageCommandOption {
+	public constructor() {
+		super({
+			type: MessageCommandOptionType.Mentionable,
+			regex: /<@!?(\d{17,19})>|<#(\d{17,19})>|<@&(\d{17,19})>/,
+		});
+	}
+
+	public buildRegexString() {
+		return this.regex.source;
+	}
+
+	public override validate(option: string): Snowflake | undefined {
+		const matches = option.matchAll(this.regex).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }

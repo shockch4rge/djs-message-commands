@@ -4,10 +4,10 @@ import { roleMention } from "@discordjs/builders";
 
 import {
     MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMemberOption,
-    MessageCommandNumberOption, MessageCommandOption, MessageCommandOptionChoiceable,
-    MessageCommandOptionType, MessageCommandRoleOption, MessageCommandStringOption
+    MessageCommandNumberOption, MessageCommandOption, MessageCommandRoleOption,
+    MessageCommandStringOption
 } from "./";
-import { MessageCommandOptionError } from "./MessageCommandOption";
+import { MessageCommandMentionableOption, MessageCommandOptionError } from "./MessageCommandOption";
 
 export interface MessageCommandBuilderData {
 	name: string;
@@ -189,6 +189,17 @@ export class MessageCommandBuilder {
 	 */
 	public addRoleOption(composer: (option: MessageCommandRoleOption) => MessageCommandRoleOption) {
 		const option = composer(new MessageCommandRoleOption());
+		this.options.push(option);
+		return this;
+	}
+
+	/**
+	 * Adds a mentionable option to the command.
+	 * @param composer A function that returns an instance of the option.
+	 * @returns The builder instance.
+	 */
+	public addMentionableOption(composer: (option: MessageCommandMentionableOption) => MessageCommandMentionableOption) {
+		const option = composer(new MessageCommandMentionableOption());
 		this.options.push(option);
 		return this;
 	}
