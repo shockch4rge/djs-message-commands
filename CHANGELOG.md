@@ -1,8 +1,18 @@
 # Release Notes
 
-## [Unreleased]
 
-## 1.2.0 - 2020-04-03
+## 2.0.0 - 2022-09-26
+
+## Added
+
+- Mentionable options can be added to message commands (this was a missing feature I forgot to add)
+
+## Changed
+
+- Updated to discord.js v14
+- Fixed multiple bugs
+
+## 1.2.0 - 2022-04-03
 
 ## Changed
 
