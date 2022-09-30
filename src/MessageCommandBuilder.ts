@@ -1,6 +1,4 @@
-import { Message, PermissionResolvable } from "discord.js";
-
-import { roleMention } from "@discordjs/builders";
+import { Message, PermissionResolvable, roleMention } from "discord.js";
 
 import {
     MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMemberOption,
@@ -269,8 +267,7 @@ export class MessageCommandBuilder {
 			return [errors, parsedOptions] as const;
 		}
 
-		for (let i = 0; i < this.options.length; i++) {
-			const option = this.options[i];
+		for (const [i, option] of this.options.entries()) {
 			const result = option.validate(args[i]);
 
 			if (result === undefined) {
