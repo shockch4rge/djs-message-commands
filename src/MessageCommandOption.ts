@@ -102,25 +102,25 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	}
 
 	/**
-	 * Add a choice for this option. Chain this multiple times to add more options OR use {@link MessageCommandOptionChoiceable.setChoices}.
-	 * @param choice The choice to add.
+	 * Add one or many choice(s) for this option. Chain this multiple times to add more options OR use {@link MessageCommandOptionChoiceable.setChoices}.
+	 * @param choices The choices to add.
 	 * @returns The option instance.
 	 */
-	public addChoice(...choice: MessageCommandOptionChoice<T>) {
-		if (!choice.length) {
+	public addChoices(...choices: MessageCommandOptionChoice<T>[]) {
+		if (!choices.length) {
 			throw new Error("There must be at least one choice provided in the array.");
 		}
 
-		if (choice.some(c => !c)) {
-			throw new Error("You must provide a name and value for the option choice.");
+		if (choices.some(c => !c)) {
+			throw new Error("You must provide a name and value for all option choices.");
 		}
 
-		this.choices.push(choice);
+		this.choices.push(...choices);
 		return this;
 	}
 
 	/**
-	 * Add multiple choices for this option. Use this either once OR chain {@link MessageCommandOptionChoiceable.addChoice}.
+	 * Add multiple choices for this option. Use this either once OR chain {@link MessageCommandOptionChoiceable.addChoices}.
 	 * @param choices The choices to add.
 	 * @returns	The option instance.
 	 */
@@ -131,7 +131,7 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 
 		for (const choice of choices) {
 			if (choice.some(c => !c)) {
-				throw new Error("You must provide a name and value for every option choice.");
+				throw new Error("You must provide a name and value for all option choices.");
 			}
 		}
 

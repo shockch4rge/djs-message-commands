@@ -10,13 +10,13 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(() => option.setDescription("")).toThrow(
 			"Option description must be at least one character long."
 		);
-		expect(() => option.addChoice("", "")).toThrow(
+		expect(() => option.addChoices(["", ""])).toThrow(
 			"You must provide a name and value for the option choice."
 		);
-		expect(() => option.addChoice("", "not-omitted")).toThrow(
+		expect(() => option.addChoices(["", "not-omitted"])).toThrow(
 			"You must provide a name and value for the option choice."
 		);
-		expect(() => option.addChoice("not-omitted", "")).toThrow(
+		expect(() => option.addChoices(["not-omitted", ""])).toThrow(
 			"You must provide a name and value for the option choice."
 		);
 		expect(() =>
