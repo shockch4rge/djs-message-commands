@@ -71,10 +71,10 @@ export abstract class MessageCommandOption {
 	}
 
 	/**
-	 * Performs a type-specific validation on the option.
-	 * @param option The option to compare to.
+	 * Performs a type-specific validation on the provided message argument.
+	 * @param arg The argument to compare to.
 	 */
-	public abstract validate(option: string): unknown;
+	public abstract validate(arg: string): unknown;
 }
 
 /**
@@ -107,15 +107,19 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 * @returns The option instance.
 	 */
 	public addChoices(...choices: MessageCommandOptionChoice<T>[]) {
-		if (!choices.length) {
-			throw new Error("There must be at least one choice provided in the array.");
+		for (const choice of choices) {
+			if (!choice.length) {
+				throw new Error("There must be at least one choice provided in the array.");
+			}
+
+			if (choice.some(c => !c)) {
+				throw new Error("You must provide a name and value for all option choices.");
+			}
+
+			this.choices.push(choice);
 		}
 
-		if (choices.some(c => !c)) {
-			throw new Error("You must provide a name and value for all option choices.");
-		}
 
-		this.choices.push(...choices);
 		return this;
 	}
 
@@ -145,6 +149,15 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
  * @extends MessageCommandOptionChoiceable
  */
 export class MessageCommandStringOption extends MessageCommandOptionChoiceable<string> {
+	/**
+	 * The minimum length this string argument can be.
+	 */
+	public minLength?: number;
+	/**
+	 * The maximum length this string argument can be.
+	 */
+	public maxLength?: number;
+
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.String,
@@ -152,14 +165,70 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 		});
 	}
 
-	public override validate(option: string): string | undefined {
+	public override buildRegexString() {
+		const min = this.minLength;
+		const max = this.maxLength;
+
+		const lengthRegex = min && max
+			? `{${min},${max}}`
+			: min
+				? `{${min},}`
+				: max
+					? `{0,${max}}`
+					: "";
+
+		if (min || max) {
+			return new RegExp(`"(.${lengthRegex})"`).source;
+		}
+
+		// use the original implementation as we can't have choices and min/max length at the same time anyway
+		return super.buildRegexString();
+	}
+
+	/**
+	 * Sets the minimum length of the string argument.
+	 * @param minLength The minimum length this string argument can be.
+	 * @returns The option instance
+	 */
+	public setMinLength(minLength: number) {
+		if (this.choices.length) {
+			throw new Error("You cannot set a minimum length if choices are provided.");
+		}
+
+		if (minLength < 0) {
+			throw new Error("Minimum length cannot be less than 0.");
+		}
+
+		this.minLength = minLength;
+		return this;
+	}
+
+	/**
+	 * Sets the maximum length of the string argument.
+	 * @param maxLength The maximum length this string argument can be.
+	 * @returns The option instance
+	 */
+	public setMaxLength(maxLength: number) {
+		if (this.choices.length) {
+			throw new Error("You cannot set a maximum length if choices are provided.");
+		}
+
+		if (maxLength < 0) {
+			throw new Error("Maximum length cannot be less than 0.");
+		}
+
+		this.maxLength = maxLength;
+		return this;
+	}
+
+	public validate(arg: string): string | undefined {
 		for (const choice of this.choices) {
-			if (choice[1] === option) {
+			if (choice[1] === arg) {
 				return choice[1];
 			}
 		}
 
-		const matches = option.matchAll(/^"(.+)"$/gi).next().value;
+		const matches = arg.matchAll(/^"(.+)"$/gi).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -176,8 +245,8 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 		});
 	}
 
-	public override validate(option: string) {
-		const number = Number.parseInt(option);
+	public validate(arg: string) {
+		const number = Number.parseInt(arg);
 		return Number.isNaN(number) ? undefined : number;
 	}
 }
@@ -198,16 +267,15 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 		return this.regex.source;
 	}
 
-	public override validate(option: string): boolean | undefined {
-		const matches = option.match(/^(true|false)$/g);
+	public validate(arg: string) {
+		const matches = arg.match(this.regex);
 
-		if (matches) {
-			if (matches[0] === "true") {
-				return true;
-			}
-			if (matches[0] === "false") {
-				return false;
-			}
+		if (matches?.[0] === "true") {
+			return true;
+		}
+
+		if (matches?.[0] === "false") {
+			return false;
 		}
 
 		return undefined;
@@ -230,8 +298,8 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 		return this.regex.source;
 	}
 
-	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(new RegExp(MessageMentions.UsersPattern, "g")).next().value;
+	public validate(arg: string): Snowflake | undefined {
+		const matches = arg.matchAll(new RegExp(MessageMentions.UsersPattern, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -252,7 +320,7 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 		return this.regex.source;
 	}
 
-	public override validate(option: string): Snowflake | undefined {
+	public validate(option: string): Snowflake | undefined {
 		const matches = option.matchAll(new RegExp(this.regex, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
@@ -274,8 +342,8 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 		return this.regex.source;
 	}
 
-	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(new RegExp(this.regex, "g")).next().value;
+	public validate(arg: string): Snowflake | undefined {
+		const matches = arg.matchAll(new RegExp(this.regex, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -296,8 +364,8 @@ export class MessageCommandMentionableOption extends MessageCommandOption {
 		return this.regex.source;
 	}
 
-	public override validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(this.regex).next().value;
+	public validate(arg: string): Snowflake | undefined {
+		const matches = arg.matchAll(this.regex).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
