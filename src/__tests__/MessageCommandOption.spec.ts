@@ -26,6 +26,16 @@ describe("MessageCommandOption constructing and testing", () => {
 				["not-omitted", ""],
 			])
 		).toThrow("You must provide a name and value for all option choices.");
+
+		// test compatibility with min/max length
+		option.addChoices(["name", "value"]);
+
+		expect(() =>
+			option.setMinLength(5)
+		).toThrow("You cannot set a minimum length if choices are provided.")
+		expect(() =>
+			option.setMaxLength(5)
+		).toThrow("You cannot set a maximum length if choices are provided.")
 	});
 
 	it("test single string option with regex", () => {
