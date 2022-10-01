@@ -11,13 +11,13 @@ describe("MessageCommandOption constructing and testing", () => {
 			"Option description must be at least one character long."
 		);
 		expect(() => option.addChoices(["", ""])).toThrow(
-			"You must provide a name and value for the option choice."
+			"You must provide a name and value for all option choices."
 		);
 		expect(() => option.addChoices(["", "not-omitted"])).toThrow(
-			"You must provide a name and value for the option choice."
+			"You must provide a name and value for all option choices."
 		);
 		expect(() => option.addChoices(["not-omitted", ""])).toThrow(
-			"You must provide a name and value for the option choice."
+			"You must provide a name and value for all option choices."
 		);
 		expect(() =>
 			option.setChoices([
@@ -25,7 +25,7 @@ describe("MessageCommandOption constructing and testing", () => {
 				["", "not-omitted"],
 				["not-omitted", ""],
 			])
-		).toThrow("You must provide a name and value for every option choice.");
+		).toThrow("You must provide a name and value for all option choices.");
 	});
 
 	it("test single string option with regex", () => {
