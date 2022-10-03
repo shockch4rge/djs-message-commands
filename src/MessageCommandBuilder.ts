@@ -43,8 +43,8 @@ export class MessageCommandBuilder {
 	public readonly permissions: PermissionResolvable[];
 
 	public constructor(data?: MessageCommandBuilderData) {
-		this.name = data?.name ?? "No name implemented";
-		this.description = data?.description ?? "No description implemented";
+		this.name = data?.name ?? "";
+		this.description = data?.description ?? "";
 		this.aliases = data?.aliases ?? [];
 		this.options = data?.options ?? [];
 		this.roleIds = data?.roleIds ?? [];

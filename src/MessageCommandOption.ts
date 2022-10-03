@@ -32,8 +32,8 @@ export abstract class MessageCommandOption {
 	public readonly defaultRegex: RegExp;
 
 	public constructor(data: Pick<MessageCommandOptionData, "type" | "defaultRegex">) {
-		this.name = "No name implemented";
-		this.description = "No description implemented";
+		this.name = "";
+		this.description = "";
 		this.type = data.type;
 		this.defaultRegex = data.defaultRegex;
 	}
