@@ -483,7 +483,7 @@ export interface MessageCommandOptionError {
 
 export const MessageCommandOptionErrors = {
 	InvalidArgType: "InvalidArgType",
-	MissingArgs: "MissingArgs",
+	InvalidArgCount: "InvalidArgCount",
 	MissingPermissions: "MissingPermissions",
-	MissionRoles: "MissingRoles",
+	MissingRoles: "MissingRoles",
 } as const;

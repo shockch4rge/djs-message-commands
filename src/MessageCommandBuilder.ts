@@ -251,7 +251,7 @@ export class MessageCommandBuilder {
 
 				errors.push({
 					message: `Missing role: ${roleMention(id)}`,
-					type: "MissionRoles",
+					type: "MissingRoles",
 				});
 			}
 		}
@@ -261,7 +261,7 @@ export class MessageCommandBuilder {
 
 			errors.push({
 				message: `Expected ${this.options.length} arguments, but got ${args.length}.`,
-				type: "MissingArgs",
+				type: "InvalidArgCount",
 			});
 
 			return [errors, parsedOptions] as const;
