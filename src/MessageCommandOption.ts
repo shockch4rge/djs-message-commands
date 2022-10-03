@@ -1,10 +1,11 @@
 import { MessageMentions, Snowflake } from "discord.js";
+import toRegexRange from "to-regex-range";
 
 export interface MessageCommandOptionData {
 	name: string;
 	description: string;
 	readonly type: MessageCommandOptionType;
-	readonly regex: RegExp;
+	readonly defaultRegex: RegExp;
 }
 
 /**
@@ -30,11 +31,11 @@ export abstract class MessageCommandOption {
 	 */
 	public readonly regex: RegExp;
 
-	public constructor(data: Pick<MessageCommandOptionData, "type" | "regex">) {
+	public constructor(data: Pick<MessageCommandOptionData, "type" | "defaultRegex">) {
 		this.name = "No name implemented";
 		this.description = "No description implemented";
 		this.type = data.type;
-		this.regex = data.regex;
+		this.regex = data.defaultRegex;
 	}
 
 	/**
@@ -88,7 +89,7 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 */
 	public choices: MessageCommandOptionChoice<T>[];
 
-	public constructor(type: Pick<MessageCommandOptionData, "type" | "regex">) {
+	public constructor(type: Pick<MessageCommandOptionData, "type" | "defaultRegex">) {
 		super(type);
 		this.choices = [];
 	}
@@ -108,17 +109,12 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 */
 	public addChoices(...choices: MessageCommandOptionChoice<T>[]) {
 		for (const choice of choices) {
-			if (!choice.length) {
-				throw new Error("There must be at least one choice provided in the array.");
-			}
-
-			if (choice.some(c => !c)) {
+			if (choice.some(c => c === "")) {
 				throw new Error("You must provide a name and value for all option choices.");
 			}
 
 			this.choices.push(choice);
 		}
-
 
 		return this;
 	}
@@ -128,13 +124,9 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	 * @param choices The choices to add.
 	 * @returns	The option instance.
 	 */
-	public setChoices(choices: MessageCommandOptionChoice<T>[]) {
-		if (!choices.length) {
-			throw new Error("You must provide at least one choice.");
-		}
-
+	public setChoices(...choices: MessageCommandOptionChoice<T>[]) {
 		for (const choice of choices) {
-			if (choice.some(c => !c)) {
+			if (choice.some(c => c === "")) {
 				throw new Error("You must provide a name and value for all option choices.");
 			}
 		}
@@ -161,7 +153,7 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.String,
-			regex: /"(.+)"/,
+			defaultRegex: /"(.+)"/,
 		});
 	}
 
@@ -222,11 +214,21 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 	}
 
 	public validate(arg: string): string | undefined {
-		for (const choice of this.choices) {
+		for (const [i, choice] of this.choices.entries()) {
 			if (choice[1] === arg) {
 				return choice[1];
 			}
+
+			// we've reached the end of the choices; no need for further validation
+			if (i === this.choices.length - 1) {
+				return undefined;
+			}
 		}
+
+		if (this.minLength || this.maxLength) {
+			return new RegExp(`^${this.buildRegexString()}&`).test(arg) ? arg : undefined;
+		}
+
 
 		const matches = arg.matchAll(/^"(.+)"$/gi).next().value;
 		return matches ? matches[1] : undefined;
@@ -238,15 +240,101 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
  * @extends MessageCommandOptionChoiceable
  */
 export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<number> {
+	public minValue?: number;
+	public maxValue?: number;
+
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Number,
-			regex: /(\d+)/
+			defaultRegex: /(\d+)/
 		});
 	}
 
+	public override buildRegexString() {
+		const min = this.minValue;
+		const max = this.maxValue;
+
+		// does this hurt performance? idk
+		if (min || max) {
+			return toRegexRange(min ?? -100_000_000, max);
+		}
+
+		// use the original implementation; same case as string options
+		return super.buildRegexString();
+	}
+
+	/**
+	 * Sets the minimum value of the number argument.
+	 * @param minValue The minimum value this number argument can be.
+	 * @returns The option instance
+	 * @throws If the minimum value is less than 0.
+	 * @throws If choices are provided.
+	*/
+	public setMinValue(minValue: number) {
+		if (this.choices.length) {
+			throw new Error("You cannot set a minimum value if choices are provided.");
+		}
+
+		if (minValue < 0) {
+			throw new Error("Minimum value cannot be less than 0.");
+		}
+
+		if (this.maxValue && minValue > this.maxValue) {
+			throw new Error("Minimum value cannot be greater than maximum value.");
+		}
+
+		this.minValue = minValue;
+		return this;
+	}
+
+	/**
+	 * Sets the minimum value of the number argument.
+	 * @param maxValue The minimum value this number argument can be.
+	 * @returns The option instance
+	 * @throws If the minimum value is less than 0.
+	 * @throws If choices are provided.
+	*/
+	public setMaxValue(maxValue: number) {
+		if (this.choices.length) {
+			throw new Error("You cannot set a minimum value if choices are provided.");
+		}
+
+		if (maxValue < 0) {
+			throw new Error("Maximum value cannot be less than 0.");
+		}
+
+		if (this.minValue && maxValue <= this.minValue) {
+			throw new Error("Maximum value cannot be less than or equal to the minimum value.");
+		}
+
+		this.maxValue = maxValue;
+		return this;
+	}
+
 	public validate(arg: string) {
-		const number = Number.parseInt(arg);
+		for (const [i, choice] of this.choices.entries()) {
+			if (choice[1] === this.parseFloatOrNumber(arg)) {
+				return choice[1];
+			}
+
+			// we've reached the end of the choices; no need for further validation
+			if (i === this.choices.length - 1) {
+				return undefined;
+			}
+		}
+
+		if (this.minValue || this.maxValue) {
+			return new RegExp(`^${this.buildRegexString()}$`)
+				.test(arg)
+				? this.parseFloatOrNumber(arg)
+				: undefined;
+		}
+
+		return this.parseFloatOrNumber(arg);
+	}
+
+	public parseFloatOrNumber(stringNum: string) {
+		const number = Number.parseFloat(stringNum);
 		return Number.isNaN(number) ? undefined : number;
 	}
 }
@@ -259,7 +347,7 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Boolean,
-			regex: /(true|false)/,
+			defaultRegex: /(true|false)/,
 		});
 	}
 
@@ -290,7 +378,7 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Member,
-			regex: /<@!?(\d{17,19})>/,
+			defaultRegex: /<@!?(\d{17,19})>/,
 		});
 	}
 
@@ -312,7 +400,7 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Channel,
-			regex: /<#(\d{17,19})>/,
+			defaultRegex: /<#(\d{17,19})>/,
 		});
 	}
 
@@ -334,7 +422,7 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Role,
-			regex: /<@&(\d{17,19})>/,
+			defaultRegex: /<@&(\d{17,19})>/,
 		});
 	}
 
@@ -356,7 +444,7 @@ export class MessageCommandMentionableOption extends MessageCommandOption {
 	public constructor() {
 		super({
 			type: MessageCommandOptionType.Mentionable,
-			regex: /<@!?(\d{17,19})>|<#(\d{17,19})>|<@&(\d{17,19})>/,
+			defaultRegex: /<@!?(\d{17,19})>|<#(\d{17,19})>|<@&(\d{17,19})>/,
 		});
 	}
 

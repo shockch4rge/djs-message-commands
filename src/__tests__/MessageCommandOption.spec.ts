@@ -1,6 +1,21 @@
-import { MessageCommandBuilder, MessageCommandOptionType, MessageCommandStringOption } from "../";
+import {
+    MessageCommandBuilder, MessageCommandNumberOption, MessageCommandOptionType,
+    MessageCommandStringOption
+} from "../";
 
 const PREFIX = ">>";
+
+function createNumberOption() {
+	return new MessageCommandNumberOption().setName("number").setDescription("number option");
+}
+
+beforeAll(() => {
+	const numberOption = createNumberOption();
+
+	expect(numberOption.name).toBe("number");
+	expect(numberOption.description).toBe("number option");
+	expect(numberOption.type).toBe(MessageCommandOptionType.Number);
+})
 
 describe("MessageCommandOption constructing and testing", () => {
 	it("throw errors for setting missing/incorrect properties", () => {
@@ -20,11 +35,11 @@ describe("MessageCommandOption constructing and testing", () => {
 			"You must provide a name and value for all option choices."
 		);
 		expect(() =>
-			option.setChoices([
+			option.setChoices(
 				["", ""],
 				["", "not-omitted"],
 				["not-omitted", ""],
-			])
+			)
 		).toThrow("You must provide a name and value for all option choices.");
 
 		// test compatibility with min/max length
@@ -86,6 +101,71 @@ describe("MessageCommandOption constructing and testing", () => {
 		mockMessages.forEach(msg => expect(!!msg.match(regex)).toBe(true));
 	});
 
+	it("specify multiple string choices and test with regex", () => {
+		const builder = new MessageCommandBuilder();
+		builder.setName("test-name");
+		builder.setDescription("test description");
+
+		builder.addStringOption(option =>
+			option
+				.setName("test-option-name")
+				.setDescription("test option description")
+				.setChoices(
+					["choice-1", "choice-1"],
+					["choice-2", "choice-2"],
+					["choice-3", "choice-3"],
+				)
+		);
+
+		const expectedRegex = /^>>(test-name)\s+"(choice-1|choice-2|choice-3)"$/gm;
+
+		expect(builder.name).toBe("test-name");
+		expect(builder.description).toBe("test description");
+		expect(builder.options.length).toBe(1);
+		expect(builder.options[0].name).toBe("test-option-name");
+		expect(builder.options[0].description).toBe("test option description");
+		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
+		expect(builder.toRegex(PREFIX)).toEqual(expectedRegex);
+	});
+
+	it("number option", () => {
+		const option1 = createNumberOption();
+		const option2 = createNumberOption();
+
+		option2.addChoices(
+			["v1", 24],
+			["v2", 42],
+			["v3", 0],
+			["v4", -25],
+		)
+
+		expect(() => option1.setMinValue(-1)).toThrow("Minimum value cannot be less than 0.");
+		expect(() => option1.setMaxValue(-1)).toThrow("Maximum value cannot be less than 0.");
+
+		// test incompatible min/max values
+		option1.setMinValue(12);
+		expect(() => option1.setMaxValue(10)).toThrow();
+
+		option1.setMinValue(0);
+		option1.setMaxValue(24);
+
+		expect(option1.minValue).toBe(0);
+		expect(option1.maxValue).toBe(24);
+
+		expect(option1.validate("0")).toBe(0);
+		expect(option1.validate("24")).toBe(24);
+		expect(option1.validate("12")).toBe(12);
+		expect(option1.validate("25")).toBe(undefined);
+		expect(option1.validate("-1")).toBe(undefined);
+
+		expect(option2.validate("2")).toBe(undefined);
+		expect(option2.validate("100")).toBe(undefined);
+		expect(option2.validate("24")).toBe(24);
+		expect(option2.validate("42")).toBe(42);
+		expect(option2.validate("0")).toBe(0);
+		expect(option2.validate("-25")).toBe(-25);
+	});
+
 	it("test all option types with regex", () => {
 		const builder = new MessageCommandBuilder();
 		builder.setName("test-name");
@@ -140,30 +220,5 @@ describe("MessageCommandOption constructing and testing", () => {
 		expect(actualRegex.test(mockMessage)).toBe(true);
 	});
 
-	it("specify multiple string choices and test with regex", () => {
-		const builder = new MessageCommandBuilder();
-		builder.setName("test-name");
-		builder.setDescription("test description");
 
-		builder.addStringOption(option =>
-			option
-				.setName("test-option-name")
-				.setDescription("test option description")
-				.setChoices([
-					["choice-1", "choice-1"],
-					["choice-2", "choice-2"],
-					["choice-3", "choice-3"],
-				])
-		);
-
-		const expectedRegex = /^>>(test-name)\s+"(choice-1|choice-2|choice-3)"$/gm;
-
-		expect(builder.name).toBe("test-name");
-		expect(builder.description).toBe("test description");
-		expect(builder.options.length).toBe(1);
-		expect(builder.options[0].name).toBe("test-option-name");
-		expect(builder.options[0].description).toBe("test option description");
-		expect(builder.options[0].type).toBe(MessageCommandOptionType.String);
-		expect(builder.toRegex(PREFIX)).toEqual(expectedRegex);
-	});
 });
