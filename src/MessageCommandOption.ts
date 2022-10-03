@@ -16,11 +16,11 @@ export abstract class MessageCommandOption {
 	/**
 	 * The name of the option.
 	 */
-	public name: string;
+	public readonly name: string;
 	/**
 	 * The description of the option.
 	 */
-	public description: string;
+	public readonly description: string;
 	/**
 	 * The type of the option.
 	 */
@@ -29,13 +29,13 @@ export abstract class MessageCommandOption {
 	/**
 	 * The default regex literal of the option.
 	 */
-	public readonly regex: RegExp;
+	public readonly defaultRegex: RegExp;
 
 	public constructor(data: Pick<MessageCommandOptionData, "type" | "defaultRegex">) {
 		this.name = "No name implemented";
 		this.description = "No description implemented";
 		this.type = data.type;
-		this.regex = data.defaultRegex;
+		this.defaultRegex = data.defaultRegex;
 	}
 
 	/**
@@ -53,7 +53,7 @@ export abstract class MessageCommandOption {
 			throw new Error("Option name must be at least one character long.");
 		}
 
-		this.name = name;
+		Reflect.set(this, "name", name);
 		return this;
 	}
 
@@ -67,7 +67,7 @@ export abstract class MessageCommandOption {
 			throw new Error("Option description must be at least one character long.");
 		}
 
-		this.description = description;
+		Reflect.set(this, "description", description);
 		return this;
 	}
 
@@ -87,7 +87,7 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 	/**
 	 * The available pre-determined choices for this option.
 	 */
-	public choices: MessageCommandOptionChoice<T>[];
+	public readonly choices: MessageCommandOptionChoice<T>[];
 
 	public constructor(type: Pick<MessageCommandOptionData, "type" | "defaultRegex">) {
 		super(type);
@@ -99,7 +99,7 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 			return new RegExp(`"(${this.choices.map(c => c[1]).join("|")})"`).source;
 		}
 
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	/**
@@ -131,7 +131,7 @@ export abstract class MessageCommandOptionChoiceable<T extends string | number> 
 			}
 		}
 
-		this.choices = choices;
+		Reflect.set(this, "choices", choices);
 		return this;
 	}
 }
@@ -144,11 +144,11 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 	/**
 	 * The minimum length this string argument can be.
 	 */
-	public minLength?: number;
+	public readonly minLength?: number;
 	/**
 	 * The maximum length this string argument can be.
 	 */
-	public maxLength?: number;
+	public readonly maxLength?: number;
 
 	public constructor() {
 		super({
@@ -191,7 +191,7 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 			throw new Error("Minimum length cannot be less than 0.");
 		}
 
-		this.minLength = minLength;
+		Reflect.set(this, "minLength", minLength);
 		return this;
 	}
 
@@ -209,7 +209,7 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
 			throw new Error("Maximum length cannot be less than 0.");
 		}
 
-		this.maxLength = maxLength;
+		Reflect.set(this, "maxLength", maxLength);
 		return this;
 	}
 
@@ -240,8 +240,8 @@ export class MessageCommandStringOption extends MessageCommandOptionChoiceable<s
  * @extends MessageCommandOptionChoiceable
  */
 export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<number> {
-	public minValue?: number;
-	public maxValue?: number;
+	public readonly minValue?: number;
+	public readonly maxValue?: number;
 
 	public constructor() {
 		super({
@@ -283,7 +283,7 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 			throw new Error("Minimum value cannot be greater than maximum value.");
 		}
 
-		this.minValue = minValue;
+		Reflect.set(this, "minValue", minValue);
 		return this;
 	}
 
@@ -307,7 +307,7 @@ export class MessageCommandNumberOption extends MessageCommandOptionChoiceable<n
 			throw new Error("Maximum value cannot be less than or equal to the minimum value.");
 		}
 
-		this.maxValue = maxValue;
+		Reflect.set(this, "maxValue", maxValue);
 		return this;
 	}
 
@@ -352,11 +352,11 @@ export class MessageCommandBooleanOption extends MessageCommandOption {
 	}
 
 	public buildRegexString() {
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	public validate(arg: string) {
-		const matches = arg.match(this.regex);
+		const matches = arg.match(this.defaultRegex);
 
 		if (matches?.[0] === "true") {
 			return true;
@@ -383,7 +383,7 @@ export class MessageCommandMemberOption extends MessageCommandOption {
 	}
 
 	public buildRegexString() {
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	public validate(arg: string): Snowflake | undefined {
@@ -405,11 +405,11 @@ export class MessageCommandChannelOption extends MessageCommandOption {
 	}
 
 	public buildRegexString() {
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	public validate(option: string): Snowflake | undefined {
-		const matches = option.matchAll(new RegExp(this.regex, "g")).next().value;
+		const matches = option.matchAll(new RegExp(this.defaultRegex, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -427,11 +427,11 @@ export class MessageCommandRoleOption extends MessageCommandOption {
 	}
 
 	public buildRegexString() {
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	public validate(arg: string): Snowflake | undefined {
-		const matches = arg.matchAll(new RegExp(this.regex, "g")).next().value;
+		const matches = arg.matchAll(new RegExp(this.defaultRegex, "g")).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }
@@ -449,11 +449,11 @@ export class MessageCommandMentionableOption extends MessageCommandOption {
 	}
 
 	public buildRegexString() {
-		return this.regex.source;
+		return this.defaultRegex.source;
 	}
 
 	public validate(arg: string): Snowflake | undefined {
-		const matches = arg.matchAll(this.regex).next().value;
+		const matches = arg.matchAll(this.defaultRegex).next().value;
 		return matches ? matches[1] : undefined;
 	}
 }

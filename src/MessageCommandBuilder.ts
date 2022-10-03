@@ -20,27 +20,27 @@ export class MessageCommandBuilder {
 	/**
 	 * The name of the command.
 	 */
-	public name: string;
+	public readonly name: string;
 	/**
 	 * The description of the command.
 	 */
-	public description: string;
+	public readonly description: string;
 	/**
 	 * Any aliases the command may be executed with.
 	 */
-	public aliases: string[];
+	public readonly aliases: string[];
 	/**
 	 * The options/arguments that can be supplied to this command.
 	 */
-	public options: MessageCommandOption[];
+	public readonly options: MessageCommandOption[];
 	/**
 	 * The role IDs permitted to execute this command.
 	 */
-	public roleIds: string[];
+	public readonly roleIds: string[];
 	/**
 	 * The permissions permitted to execute this command.
 	 */
-	public permissions: PermissionResolvable[];
+	public readonly permissions: PermissionResolvable[];
 
 	public constructor(data?: MessageCommandBuilderData) {
 		this.name = data?.name ?? "No name implemented";
@@ -61,7 +61,7 @@ export class MessageCommandBuilder {
 			throw new Error("Command name must be at least one character long.");
 		}
 
-		this.name = name;
+		Reflect.set(this, "name", name);
 		return this;
 	}
 
@@ -75,7 +75,7 @@ export class MessageCommandBuilder {
 			throw new Error("Command description must be at least one character long.");
 		}
 
-		this.description = description;
+		Reflect.set(this, "description", description);
 		return this;
 	}
 
@@ -93,7 +93,7 @@ export class MessageCommandBuilder {
 			throw new Error("Aliases must be at least one character long.");
 		}
 
-		this.aliases = aliases;
+		Reflect.set(this, "aliases", aliases);
 		return this;
 	}
 
@@ -107,7 +107,7 @@ export class MessageCommandBuilder {
 			throw new Error("There must be at least one role ID provided in the array.");
 		}
 
-		this.roleIds = ids;
+		Reflect.set(this, "roleIds", ids);
 		return this;
 	}
 
@@ -121,7 +121,7 @@ export class MessageCommandBuilder {
 			throw new Error("There must be at least one permission provided in the array.");
 		}
 
-		this.permissions = permissions;
+		Reflect.set(this, "permissions", permissions);
 		return this;
 	}
 
