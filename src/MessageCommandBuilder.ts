@@ -3,7 +3,7 @@ import { Message, PermissionResolvable, roleMention } from "discord.js";
 import {
     MessageCommandBooleanOption, MessageCommandChannelOption, MessageCommandMemberOption,
     MessageCommandNumberOption, MessageCommandOption, MessageCommandRoleOption,
-    MessageCommandStringOption
+    MessageCommandStringOption, parseMessage
 } from "./";
 import { MessageCommandMentionableOption, MessageCommandOptionError } from "./MessageCommandOption";
 
@@ -228,7 +228,7 @@ export class MessageCommandBuilder {
 	public validate(message: Message) {
 		let errors: MessageCommandOptionError[] | null = null;
 		const parsedOptions: unknown[] = [];
-		const args = message.content.trim().split(/\s+/).slice(1);
+		const args = parseMessage({ content: message.content, prefix: null }).rawArgs.slice(1);
 
 		for (const perm of this.permissions) {
 			if (!message.member!.permissions.has(perm)) {
@@ -260,7 +260,7 @@ export class MessageCommandBuilder {
 			errors ??= [];
 
 			errors.push({
-				message: `Missing arguments -> Expected: ${this.options.length}, Got: ${args.length}`,
+				message: `Expected ${this.options.length} arguments, but got ${args.length}.`,
 				type: "MissingArgs",
 			});
 
